@@ -1,0 +1,62 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <!-- the theme applied to the application or activity -->
+    <style name="MainTheme"
+           parent="@android:style/Theme.Holo.Light.DarkActionBar">
+        <item name="android:actionBarStyle">@style/BlueActionBar</item>
+        <item name="android:actionBarTabStyle">@style/MyActionBarTab</item>
+        <!-- 'add and setting' color -->
+        <item name="android:actionMenuTextColor">@color/Green</item>
+    </style>
+
+    <!-- ActionBar styles -->
+    <style name="BlueActionBar"
+           parent="@android:style/Widget.Holo.Light.ActionBar.Solid.Inverse">
+        <item name="android:background">@color/SteelBlue</item>
+        <item name="android:titleTextStyle">@style/MyActionBarTitleText</item>
+    </style>
+
+    <!-- ActionBar title text: 'TagDaily' -->
+    <style name="MyActionBarTitleText"
+           parent="@android:style/TextAppearance.Holo.Widget.ActionBar.Title">
+        <item name="android:textColor">@color/Crimson</item>
+    </style>
+
+    <!-- ActionBar tabs text styles -->
+    <style name="MyActionBarTab"
+           parent="@android:style/Widget.Holo.ActionBar.TabText">
+        <item name="android:textColor">@color/SteelBlue</item>
+    </style>
+
+
+
+
+    <!-- the theme applied to the second activity -->
+    <style name="SecondTheme"
+           parent="@android:style/Theme.Holo.Light.DarkActionBar">
+        <item name="android:actionBarStyle">@style/MsgActionBar</item>
+        <item name="android:actionBarTabStyle">@style/MsgActionBarTab</item>
+        <!-- 'add and setting' color -->
+        <item name="android:actionMenuTextColor">@color/Teal</item>
+    </style>
+
+    <!-- ActionBar styles -->
+    <style name="MsgActionBar"
+           parent="@android:style/Widget.Holo.Light.ActionBar.Solid.Inverse">
+        <item name="android:background">@color/PeachPuff</item>
+        <item name="android:titleTextStyle">@style/MsgActionBarTitleText</item>
+    </style>
+
+    <!-- ActionBar title text: 'TagDaily' -->
+    <style name="MsgActionBarTitleText"
+           parent="@android:style/TextAppearance.Holo.Widget.ActionBar.Title">
+        <item name="android:textColor">@color/Crimson</item>
+    </style>
+
+    <!-- ActionBar tabs text styles -->
+    <style name="MsgActionBarTab"
+           parent="@android:style/Widget.Holo.ActionBar.TabText">
+        <item name="android:textColor">@color/PeachPuff</item>
+    </style>
+
+</resources>
