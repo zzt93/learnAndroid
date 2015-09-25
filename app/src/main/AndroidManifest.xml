@@ -37,7 +37,15 @@
         <activity
             android:name=".RemindDialog"
             android:label="@string/title_activity_remind_dialog"
-            android:theme="@android:style/Theme.Dialog">
+            android:theme="@android:style/Theme.Dialog" >
+        </activity>
+        <activity
+            android:name=".WithFragment"
+            android:label="@string/title_activity_with_fragment"
+            android:parentActivityName=".FirstActivity" >
+            <meta-data
+                android:name="android.support.PARENT_ACTIVITY"
+                android:value="com.example.zzt.tagdaily.FirstActivity" />
         </activity>
     </application>
 

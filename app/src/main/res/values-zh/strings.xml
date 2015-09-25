@@ -11,4 +11,6 @@
     <string name="title_activity_remind_dialog">提示</string>
     <string name="action_dialog">显示提示</string>
     <string name="title_activity_transparent_theme">透明</string>
+    <string name="action_fragment">显示片段</string>
+    <string name="title_activity_with_fragment">使用片段</string>
 </resources>

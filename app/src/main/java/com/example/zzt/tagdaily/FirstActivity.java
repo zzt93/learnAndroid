@@ -21,7 +21,13 @@ public class FirstActivity extends Activity {
      * such as declaring the user interface (defined in an XML layout file),
      * defining member variables, and configuring some of the UI.
      *
-     * @param savedInstanceState --
+     * @param savedInstanceState -- the saved system state
+     *
+     * 1. In order for the Android system to restore the
+     * state of the views in your activity,
+     * each view must have a unique ID,
+     * supplied by the android:id attribute.
+     * 2. activity will be destroyed and recreated each time the user rotates the screen
      */
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -77,4 +83,8 @@ public class FirstActivity extends Activity {
         startActivity(intent);
     }
 
+    public void showFragment(View view) {
+        Intent intent = new Intent(this, WithFragment.class);
+        startActivity(intent);
+    }
 }
