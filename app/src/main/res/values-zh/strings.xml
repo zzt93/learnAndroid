@@ -1,0 +1,14 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="app_name">TagDaily</string>
+    <string name="action_add">添加</string>
+    <string name="action_search">搜索</string>
+    <string name="action_settings">设置</string>
+    <string name="button_send">发送</string>
+    <string name="edit_message">添加信息</string>
+    <string name="title_activity_display_message">分析结果</string>
+    <string name="action_transparent">显示透明主题</string>
+    <string name="title_activity_remind_dialog">提示</string>
+    <string name="action_dialog">显示提示</string>
+    <string name="title_activity_transparent_theme">透明</string>
+</resources>

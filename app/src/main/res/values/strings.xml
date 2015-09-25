@@ -6,7 +6,11 @@
     <string name="button_send">Send</string>
     <string name="title_activity_display_message">DisplayMessageActivity</string>
 
-    <string name="hello_world">Hello world!</string>
+    <string name="hello_world" translatable="false">Hello world!</string>
     <string name="action_search">Search tags</string>
-    <string name="action_add">添加</string>
+    <string name="action_add">add</string>
+    <string name="action_transparent">show transparent</string>
+    <string name="title_activity_transparent_theme">TransparentTheme</string>
+    <string name="title_activity_remind_dialog">RemindDialog</string>
+    <string name="action_dialog">show dialog</string>
 </resources>

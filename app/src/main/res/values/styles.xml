@@ -6,7 +6,7 @@
         <item name="android:actionBarStyle">@style/BlueActionBar</item>
         <item name="android:actionBarTabStyle">@style/MyActionBarTab</item>
         <!-- 'add and setting' color -->
-        <item name="android:actionMenuTextColor">@color/Green</item>
+        <item name="android:actionMenuTextColor">@color/White</item>
     </style>
 
     <!-- ActionBar styles -->
@@ -20,6 +20,7 @@
     <style name="MyActionBarTitleText"
            parent="@android:style/TextAppearance.Holo.Widget.ActionBar.Title">
         <item name="android:textColor">@color/Crimson</item>
+        <!--<item name="android:textAppearanceLarge">true</item>-->
     </style>
 
     <!-- ActionBar tabs text styles -->
@@ -44,6 +45,8 @@
     <style name="MsgActionBar"
            parent="@android:style/Widget.Holo.Light.ActionBar.Solid.Inverse">
         <item name="android:background">@color/PeachPuff</item>
+        <item name="android:displayOptions">showHome|showTitle</item>
+        <item name="android:windowActionBarOverlay">true</item>
         <item name="android:titleTextStyle">@style/MsgActionBarTitleText</item>
     </style>
 

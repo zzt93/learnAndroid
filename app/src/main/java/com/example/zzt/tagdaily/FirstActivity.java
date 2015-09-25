@@ -16,6 +16,13 @@ public class FirstActivity extends Activity {
     public static boolean debug = true;
     private static String thisClass = FirstActivity.class.getName();
 
+    /**
+     * some fundamental setup for the activity,
+     * such as declaring the user interface (defined in an XML layout file),
+     * defining member variables, and configuring some of the UI.
+     *
+     * @param savedInstanceState --
+     */
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -59,4 +66,15 @@ public class FirstActivity extends Activity {
         intent.putExtra(EXTRA_MESSAGE, msg);
         startActivity(intent);
     }
+
+    public void showTransparent(View view) {
+        Intent intent = new Intent(this, TransparentTheme.class);
+        startActivity(intent);
+    }
+
+    public void showDialog(View view) {
+        Intent intent = new Intent(this, RemindDialog.class);
+        startActivity(intent);
+    }
+
 }
