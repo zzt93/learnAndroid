@@ -3,10 +3,11 @@ package com.example.zzt.tagdaily;
 import android.app.Activity;
 import android.app.Fragment;
 import android.os.Bundle;
+import android.util.Log;
 import android.view.Menu;
 import android.view.MenuItem;
 
-public class WithFragment extends Activity {
+public class WithFragment extends Activity implements FileFragment.OnFragmentInteractionListener{
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -25,7 +26,7 @@ public class WithFragment extends Activity {
             }
 
             // Create a new Fragment to be placed in the activity layout
-            FirstFragment firstFragment = FirstFragment.newInstance("first", "fragment");
+            FileFragment firstFragment = FileFragment.newInstance("first", "fragment");
 //            Fragment firstFragment = new Fragment();
             // In case this activity was started with special instructions from an
             // Intent, pass the Intent's extras to the fragment as arguments
@@ -58,5 +59,10 @@ public class WithFragment extends Activity {
         }
 
         return super.onOptionsItemSelected(item);
+    }
+
+    @Override
+    public void onFragmentInteraction(String id) {
+        Log.d("this class", id + " is choose");
     }
 }
