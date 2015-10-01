@@ -6,23 +6,23 @@
     android:layout_height="match_parent"
     android:baselineAligned="false"
     android:orientation="horizontal"
-    tools:context="com.example.zzt.tagdaily.FileFragment"
+    tools:context="com.example.zzt.tagdaily.FolderFragment"
     >
 
-    <GridView
-        android:id="@android:id/list"
-        android:layout_width="match_parent"
-        android:layout_height="match_parent"
-        android:numColumns="2"
-        />
+    <!--<GridView-->
+        <!--android:id="@android:id/list"-->
+        <!--android:layout_width="match_parent"-->
+        <!--android:layout_height="match_parent"-->
+        <!--android:numColumns="2"-->
+        <!--/>-->
 
-    <!--<ListView-->
-    <!--android:id="@android:id/list"-->
-    <!--android:layout_width="0dp"-->
-    <!--android:layout_height="match_parent"-->
-    <!--android:layout_weight="1"-->
-    <!--android:background="@color/CadetBlue"-->
-    <!--/>-->
+    <ListView
+    android:id="@android:id/list"
+    android:layout_width="0dp"
+    android:layout_height="match_parent"
+    android:layout_weight="1"
+    android:background="@color/CadetBlue"
+    />
 
     <!--<ListView-->
     <!--android:id="@android:id/empty"-->

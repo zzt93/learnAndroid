@@ -1,13 +1,15 @@
 package com.example.zzt.tagdaily;
 
 import android.app.Activity;
-import android.app.Fragment;
+import android.app.FragmentTransaction;
 import android.os.Bundle;
 import android.util.Log;
 import android.view.Menu;
 import android.view.MenuItem;
 
-public class WithFragment extends Activity implements FileFragment.OnFragmentInteractionListener{
+public class WithFragment extends Activity implements
+        FolderFragment.OnFragmentInteractionListener,
+        DetailFileFragment.OnFragmentInteractionListener {
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -16,7 +18,8 @@ public class WithFragment extends Activity implements FileFragment.OnFragmentInt
 
         // Check that the activity is using the layout version with
         // the fragment_container FrameLayout
-        if (findViewById(R.id.fragment_container) != null) {
+        if (findViewById(R.id.fragment_container) != null
+                && findViewById(R.id.fragment_container2) != null) {
 
             // However, if we're being restored from a previous state,
             // then we don't need to do anything and should return or else
@@ -26,15 +29,19 @@ public class WithFragment extends Activity implements FileFragment.OnFragmentInt
             }
 
             // Create a new Fragment to be placed in the activity layout
-            FileFragment firstFragment = FileFragment.newInstance("first", "fragment");
-//            Fragment firstFragment = new Fragment();
+            FolderFragment categoryFragment = FolderFragment.newInstance("first", "fragment");
+            DetailFileFragment detailFragment = DetailFileFragment.newInstance("first", "fragment");
             // In case this activity was started with special instructions from an
             // Intent, pass the Intent's extras to the fragment as arguments
-            firstFragment.setArguments(getIntent().getExtras());
+            categoryFragment.setArguments(getIntent().getExtras());
+            detailFragment.setArguments(getIntent().getExtras());
 
             // Add the fragment to the 'fragment_container' FrameLayout
-            getFragmentManager().beginTransaction()
-                    .add(R.id.fragment_container, firstFragment).commit();
+            FragmentTransaction fragmentTransaction = getFragmentManager().beginTransaction();
+            fragmentTransaction
+                    .add(R.id.fragment_container, categoryFragment);
+            fragmentTransaction
+                    .add(R.id.fragment_container2, detailFragment).commit();
         }
 
     }

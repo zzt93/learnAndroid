@@ -1,7 +1,7 @@
 package com.example.zzt.tagdaily;
 
 import android.app.Activity;
-import android.app.ListFragment;
+import android.app.Fragment;
 import android.os.Bundle;
 import android.view.LayoutInflater;
 import android.view.View;
@@ -9,7 +9,6 @@ import android.view.ViewGroup;
 import android.widget.AbsListView;
 import android.widget.AdapterView;
 import android.widget.ListAdapter;
-import android.widget.ListView;
 import android.widget.SimpleAdapter;
 import android.widget.TextView;
 
@@ -29,7 +28,7 @@ import java.util.Map;
  * Activities containing this fragment MUST implement the {@link OnFragmentInteractionListener}
  * interface.
  */
-public class FileFragment extends ListFragment implements AbsListView.OnItemClickListener {
+public class FolderFragment extends Fragment implements AbsListView.OnItemClickListener {
 
 
     // the fragment initialization parameters, e.g. ARG_ITEM_NUMBER
@@ -44,7 +43,7 @@ public class FileFragment extends ListFragment implements AbsListView.OnItemClic
      * The fragment's ListView/GridView.
      */
     private AbsListView mListView;
-    private AbsListView secListView;
+//    private AbsListView secListView;
 
     /**
      * The Adapter which will be used to populate the ListView/GridView with
@@ -52,8 +51,8 @@ public class FileFragment extends ListFragment implements AbsListView.OnItemClic
      */
     private ListAdapter mAdapter;
 
-    public static FileFragment newInstance(String param1, String param2) {
-        FileFragment fragment = new FileFragment();
+    public static FolderFragment newInstance(String param1, String param2) {
+        FolderFragment fragment = new FolderFragment();
         Bundle args = new Bundle();
         args.putString(ARG_PARAM1, param1);
         args.putString(ARG_PARAM2, param2);
@@ -65,9 +64,13 @@ public class FileFragment extends ListFragment implements AbsListView.OnItemClic
      * Mandatory empty constructor for the fragment manager to instantiate the
      * fragment (e.g. upon screen orientation changes).
      */
-    public FileFragment() {
+    public FolderFragment() {
     }
 
+    /**
+     * prepare data for the fragment to show
+     * @param savedInstanceState -- saved state
+     */
     @Override
     public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -102,17 +105,24 @@ public class FileFragment extends ListFragment implements AbsListView.OnItemClic
     }
 
 
+    /**
+     * set the relation between data and view for it to show
+     * add listener
+     * @param inflater -- which make view from xml
+     * @param container -- the ViewGroup to hold this view
+     * @param savedInstanceState -- saved state
+     * @return created view
+     */
     @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container,
                              Bundle savedInstanceState) {
-        View view = inflater.inflate(R.layout.fragment_file, container, false);
+        View view = inflater.inflate(R.layout.fragment_folder, container, false);
 
         // Set first the data adapter
         mListView = (AbsListView) view.findViewById(android.R.id.list);
         ((AdapterView<ListAdapter>) mListView).setAdapter(mAdapter);
         mListView.setOnItemClickListener(this);
 
-        // TODO not show at the same time
 //        secListView = (AbsListView) view.findViewById(android.R.id.empty);
 //        ((AdapterView<ListAdapter>) secListView).setAdapter(mAdapter);
 
@@ -137,16 +147,16 @@ public class FileFragment extends ListFragment implements AbsListView.OnItemClic
         mListener = null;
     }
 
-    @Override
-    public void onListItemClick(ListView l, View v, int position, long id) {
-//        super.onListItemClick(l, v, position, id);
-        System.out.println(mParam2);
-        if (null != mListener) {
-            // Notify the active callbacks interface (the activity, if the
-            // fragment is attached to one) that an item has been selected.
-            mListener.onFragmentInteraction(DummyContent.ITEMS.get(position).id);
-        }
-    }
+//    @Override
+//    public void onListItemClick(ListView l, View v, int position, long id) {
+////        super.onListItemClick(l, v, position, id);
+//        System.out.println(mParam2);
+//        if (null != mListener) {
+//            // Notify the active callbacks interface (the activity, if the
+//            // fragment is attached to one) that an item has been selected.
+//            mListener.onFragmentInteraction(DummyContent.ITEMS.get(position).id);
+//        }
+//    }
 
 
     /**
@@ -164,7 +174,12 @@ public class FileFragment extends ListFragment implements AbsListView.OnItemClic
 
     @Override
     public void onItemClick(AdapterView<?> parent, View view, int position, long id) {
-
+        System.out.println(mParam2);
+        if (null != mListener) {
+            // Notify the active callbacks interface (the activity, if the
+            // fragment is attached to one) that an item has been selected.
+            mListener.onFragmentInteraction(DummyContent.ITEMS.get(position).id);
+        }
     }
 
     /**

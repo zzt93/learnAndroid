@@ -1,0 +1,17 @@
+<!-- using FrameLayout will only occupy part of screen, even using match_parent-->
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+              xmlns:tools="http://schemas.android.com/tools"
+              android:layout_width="match_parent"
+              android:layout_height="match_parent"
+              tools:context="com.example.zzt.tagdaily.DetailFileFragment"
+    >
+
+    <ListView
+        android:id="@android:id/list"
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:background="@color/IndianRed"
+        android:gravity="center"
+        />
+
+</LinearLayout>

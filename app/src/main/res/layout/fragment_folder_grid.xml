@@ -3,12 +3,12 @@
              xmlns:tools="http://schemas.android.com/tools"
              android:layout_width="match_parent"
              android:layout_height="match_parent"
-             tools:context="com.example.zzt.tagdaily.FileFragment">
+             tools:context="com.example.zzt.tagdaily.FolderFragment">
 
     <GridView
         android:id="@android:id/list"
         android:layout_width="match_parent"
         android:layout_height="match_parent"
-        android:numColumns="2"/>
+        android:numColumns="4"/>
 
 </FrameLayout>

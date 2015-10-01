@@ -5,8 +5,15 @@
            parent="@android:style/Theme.Holo.Light.DarkActionBar">
         <item name="android:actionBarStyle">@style/BlueActionBar</item>
         <item name="android:actionBarTabStyle">@style/MyActionBarTab</item>
+        <item name="android:actionMenuTextAppearance">@style/MyMenuTextAppearance</item>
+
         <!-- 'add and setting' color -->
-        <item name="android:actionMenuTextColor">@color/White</item>
+        <item name="android:actionMenuTextColor">@color/Black</item>
+    </style>
+
+
+    <style name="MyMenuTextAppearance" parent="android:TextAppearance.Holo.Widget.ActionBar.Menu">
+        <item name="android:textAllCaps">false</item>
     </style>
 
     <!-- ActionBar styles -->
@@ -28,8 +35,6 @@
            parent="@android:style/Widget.Holo.ActionBar.TabText">
         <item name="android:textColor">@color/SteelBlue</item>
     </style>
-
-
 
 
     <!-- the theme applied to the second activity -->
@@ -61,5 +66,6 @@
            parent="@android:style/Widget.Holo.ActionBar.TabText">
         <item name="android:textColor">@color/PeachPuff</item>
     </style>
+
 
 </resources>
