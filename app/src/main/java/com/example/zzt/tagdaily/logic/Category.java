@@ -1,4 +1,7 @@
-package com.example.zzt.tagdaily;
+package com.example.zzt.tagdaily.logic;
+
+import com.example.zzt.tagdaily.FolderFragment;
+import com.example.zzt.tagdaily.R;
 
 import java.util.HashMap;
 

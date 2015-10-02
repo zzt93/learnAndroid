@@ -8,11 +8,11 @@ import android.view.View;
 import android.view.ViewGroup;
 import android.widget.AbsListView;
 import android.widget.AdapterView;
-import android.widget.ArrayAdapter;
 import android.widget.ListAdapter;
 import android.widget.SimpleAdapter;
 
-import com.example.zzt.tagdaily.dummy.DummyContent;
+
+import com.example.zzt.tagdaily.logic.FileInfo;
 
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -40,6 +40,7 @@ public class DetailFileFragment extends Fragment implements AdapterView.OnItemCl
 
     private DetailFragmentInteractionListener mListener;
     private List<Map<String, String>> fileList;
+    private ArrayList<FileInfo> fileInfos;
 
     /**
      * Use this factory method to create a new instance of
@@ -122,18 +123,34 @@ public class DetailFileFragment extends Fragment implements AdapterView.OnItemCl
 
     @Override
     public void onItemClick(AdapterView<?> parent, View view, int position, long id) {
-        fileList.add(makeMap("music", "music sub1"));
-        mAdapter.notifyDataSetChanged();
+//        fileList.add(makeMap("music", "music sub1"));
+//        mAdapter.notifyDataSetChanged();
         if (null != mListener) {
             // Notify the active callbacks interface (the activity, if the
             // fragment is attached to one) that an item has been selected.
-            mListener.detailFragmentClick(fileList.get(position).get(TITLE));
+            mListener.detailFragmentClick(position);
         }
     }
 
-    public void updateListView(ArrayList fileList) {
-
+    public SimpleAdapter clearListView() {
+        this.fileList.clear();
+        return mAdapter;
     }
+
+    public SimpleAdapter addListView(ArrayList<FileInfo> fileList) {
+        // TODO: 10/2/15 not right
+        this.fileInfos = fileList;
+        for (FileInfo fileInfo : fileList) {
+            this.fileList.add(fileInfo.convertFileMap());
+        }
+        return mAdapter;
+    }
+
+    public ArrayList<FileInfo> getListView() {
+        return fileInfos;
+    }
+
+
     /**
      * This interface must be implemented by activities that contain this
      * fragment to allow an interaction in this fragment to be communicated
@@ -145,8 +162,7 @@ public class DetailFileFragment extends Fragment implements AdapterView.OnItemCl
      * >Communicating with Other Fragments</a> for more information.
      */
     public interface DetailFragmentInteractionListener {
-        // TODO: Update argument type and name
-        void detailFragmentClick(String id);
+        void detailFragmentClick(int position);
     }
 
 }

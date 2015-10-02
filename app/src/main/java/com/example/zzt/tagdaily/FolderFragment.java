@@ -12,6 +12,9 @@ import android.widget.ListAdapter;
 import android.widget.SimpleAdapter;
 import android.widget.TextView;
 
+import com.example.zzt.tagdaily.logic.Category;
+import com.example.zzt.tagdaily.logic.FileInfo;
+
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
@@ -49,7 +52,7 @@ public class FolderFragment extends Fragment implements AbsListView.OnItemClickL
      * The Adapter which will be used to populate the ListView/GridView with
      * Views.
      */
-    private ListAdapter mAdapter;
+    private SimpleAdapter mAdapter;
     private List<Map<String, String>> category;
 
     public static FolderFragment newInstance(String param1, String param2) {
@@ -169,8 +172,26 @@ public class FolderFragment extends Fragment implements AbsListView.OnItemClickL
         if (null != mListener) {
             // Notify the active callbacks interface (the activity, if the
             // fragment is attached to one) that an item has been selected.
-            mListener.folderFragmentClick(category.get(position).get(NAME));
+            mListener.folderFragmentClick(position);
         }
+    }
+
+    public SimpleAdapter addListView(ArrayList<FileInfo> files) {
+        for (FileInfo file : files) {
+            category.add(file.convertFolderMap());
+        }
+//        category.add(Category.makeMap(0));
+        return mAdapter;
+    }
+
+    public SimpleAdapter clearListView() {
+        category.clear();
+        return mAdapter;
+    }
+
+    public ArrayList<FileInfo> getListView() {
+        // TODO: 10/2/15 where
+        return null;
     }
 
     /**
@@ -184,7 +205,7 @@ public class FolderFragment extends Fragment implements AbsListView.OnItemClickL
      * >Communicating with Other Fragments</a> for more information.
      */
     public interface FolderFragmentInteractionListener {
-        void folderFragmentClick(String id);
+        void folderFragmentClick(int position);
     }
 
 }
