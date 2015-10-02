@@ -8,20 +8,22 @@
     >
 
 
-    <fragment
-        android:name="com.example.zzt.tagdaily.FolderFragment"
+    <FrameLayout
+        android:id="@+id/folder_fragment_container"
         android:layout_width="0dp"
-        android:layout_height="wrap_content"
-        android:layout_weight="1"
-        android:id="@+id/fragment_container"
+        android:layout_height="match_parent"
+        android:layout_weight="2"
         />
 
-    <fragment
-        android:name="com.example.zzt.tagdaily.DetailFileFragment"
+    <FrameLayout
+        android:id="@+id/file_fragment_container"
         android:layout_width="0dp"
-        android:layout_height="wrap_content"
-        android:layout_weight="2"
-        android:id="@+id/fragment_container2"
-        />
+        android:layout_weight="3"
+        android:layout_height="match_parent"
+        >
+
+
+    </FrameLayout>
+
 
 </LinearLayout>

@@ -12,10 +12,7 @@ import android.widget.ListAdapter;
 import android.widget.SimpleAdapter;
 import android.widget.TextView;
 
-import com.example.zzt.tagdaily.dummy.DummyContent;
-
 import java.util.ArrayList;
-import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
@@ -25,7 +22,7 @@ import java.util.Map;
  * Large screen devices (such as tablets) are supported by replacing the ListView
  * with a GridView.
  * <p/>
- * Activities containing this fragment MUST implement the {@link OnFragmentInteractionListener}
+ * Activities containing this fragment MUST implement the {@link FolderFragmentInteractionListener}
  * interface.
  */
 public class FolderFragment extends Fragment implements AbsListView.OnItemClickListener {
@@ -34,10 +31,13 @@ public class FolderFragment extends Fragment implements AbsListView.OnItemClickL
     // the fragment initialization parameters, e.g. ARG_ITEM_NUMBER
     private static final String ARG_PARAM1 = "param1";
     private static final String ARG_PARAM2 = "param2";
+    public static final String NAME = "label";
+    public static final String LOGO = "logo";
+    public static final String DESCRIPTION2 = "label2";
 
     private String mParam2 = "";
 
-    private OnFragmentInteractionListener mListener;
+    private FolderFragmentInteractionListener mListener;
 
     /**
      * The fragment's ListView/GridView.
@@ -50,6 +50,7 @@ public class FolderFragment extends Fragment implements AbsListView.OnItemClickL
      * Views.
      */
     private ListAdapter mAdapter;
+    private List<Map<String, String>> category;
 
     public static FolderFragment newInstance(String param1, String param2) {
         FolderFragment fragment = new FolderFragment();
@@ -84,24 +85,23 @@ public class FolderFragment extends Fragment implements AbsListView.OnItemClickL
 //                R.layout.with_icon, R.id.label, DummyContent.ITEMS);
 //        mAdapter = new ArrayAdapter<>(getActivity(),
 //                android.R.layout.simple_list_item_1, android.R.id.text1, DummyContent.ITEMS);
-        List<Map<String, String>> infos = new ArrayList<>();
-        infos.add(makeMap(R.mipmap.ic_launcher, "music", "music sub1"));
-        infos.add(makeMap(R.mipmap.ic_launcher, "video", "video sub2"));
-
+        category = new ArrayList<>();
+        init_category(category);
         /*
             using `String[i]` as index, to find resource in `List<Map<String, >>`
             to fit into `R.id.xxx`
          */
-        mAdapter = new SimpleAdapter(getActivity(), infos, R.layout.with_icon,
-                new String[]{"logo", "label", "label2"}, new int[]{R.id.logo, R.id.label, R.id.label2});
+        mAdapter = new SimpleAdapter(getActivity(),
+                category,
+                R.layout.with_icon,
+                new String[]{LOGO, NAME},
+                new int[]{R.id.logo, R.id.label});
     }
 
-    private HashMap<String, String> makeMap(int id, String text, String text2) {
-        HashMap<String, String> map = new HashMap<>();
-        map.put("logo", "" + id);
-        map.put("label", text);
-        map.put("label2", text2);
-        return map;
+    private void init_category(List<Map<String, String>> category) {
+        for (int i = 0; i < Category.numCategories(); i++) {
+            category.add(Category.makeMap(i));
+        }
     }
 
 
@@ -134,10 +134,10 @@ public class FolderFragment extends Fragment implements AbsListView.OnItemClickL
     public void onAttach(Activity activity) {
         super.onAttach(activity);
         try {
-            mListener = (OnFragmentInteractionListener) activity;
+            mListener = (FolderFragmentInteractionListener) activity;
         } catch (ClassCastException e) {
             throw new ClassCastException(activity.toString()
-                    + " must implement OnFragmentInteractionListener");
+                    + " must implement FolderFragmentInteractionListener");
         }
     }
 
@@ -147,16 +147,7 @@ public class FolderFragment extends Fragment implements AbsListView.OnItemClickL
         mListener = null;
     }
 
-//    @Override
-//    public void onListItemClick(ListView l, View v, int position, long id) {
-////        super.onListItemClick(l, v, position, id);
-//        System.out.println(mParam2);
-//        if (null != mListener) {
-//            // Notify the active callbacks interface (the activity, if the
-//            // fragment is attached to one) that an item has been selected.
-//            mListener.onFragmentInteraction(DummyContent.ITEMS.get(position).id);
-//        }
-//    }
+
 
 
     /**
@@ -178,7 +169,7 @@ public class FolderFragment extends Fragment implements AbsListView.OnItemClickL
         if (null != mListener) {
             // Notify the active callbacks interface (the activity, if the
             // fragment is attached to one) that an item has been selected.
-            mListener.onFragmentInteraction(DummyContent.ITEMS.get(position).id);
+            mListener.folderFragmentClick(category.get(position).get(NAME));
         }
     }
 
@@ -192,8 +183,8 @@ public class FolderFragment extends Fragment implements AbsListView.OnItemClickL
      * "http://developer.android.com/training/basics/fragments/communicating.html"
      * >Communicating with Other Fragments</a> for more information.
      */
-    public interface OnFragmentInteractionListener {
-        void onFragmentInteraction(String id);
+    public interface FolderFragmentInteractionListener {
+        void folderFragmentClick(String id);
     }
 
 }
