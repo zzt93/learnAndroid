@@ -8,14 +8,13 @@ import android.view.View;
 import android.view.ViewGroup;
 import android.widget.AbsListView;
 import android.widget.AdapterView;
-import android.widget.ListAdapter;
 import android.widget.SimpleAdapter;
+import android.widget.TextView;
 
 
 import com.example.zzt.tagdaily.logic.FileInfo;
 
 import java.util.ArrayList;
-import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
@@ -39,24 +38,26 @@ public class DetailFileFragment extends Fragment implements AdapterView.OnItemCl
     private SimpleAdapter mAdapter;
 
     private DetailFragmentInteractionListener mListener;
-    private List<Map<String, String>> fileList;
-    private ArrayList<FileInfo> fileInfos;
+    private List<Map<String, String>> fileList = new ArrayList<>();
 
     /**
      * Use this factory method to create a new instance of
      * this fragment using the provided parameters.
      *
-     * @param param1 Parameter 1.
+     * @param fileInfos Parameter 1.
      * @param param2 Parameter 2.
      * @return A new instance of fragment DetailFileFragment.
      */
-    public static DetailFileFragment newInstance(String param1, String param2) {
+    public static DetailFileFragment newInstance(ArrayList<FileInfo> fileInfos, String param2) {
         DetailFileFragment fragment = new DetailFileFragment();
         Bundle args = new Bundle();
 //        args.putString(ARG_PARAM1, param1);
 //        args.putString(ARG_PARAM2, param2);
         fragment.setArguments(args);
 
+        for (FileInfo fileInfo : fileInfos) {
+            fragment.fileList.add(fileInfo.convertFileMap());
+        }
         return fragment;
     }
 
@@ -67,10 +68,6 @@ public class DetailFileFragment extends Fragment implements AdapterView.OnItemCl
     @Override
     public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-
-        fileList = new ArrayList<>();
-        fileList.add(makeMap("music", "music sub1"));
-        fileList.add(makeMap("video", "video sub2"));
 
         /*
             using `String[i]` as index, to find resource in `List<Map<String, >>`
@@ -83,12 +80,12 @@ public class DetailFileFragment extends Fragment implements AdapterView.OnItemCl
                 new int[]{R.id.file_title, R.id.file_info});
     }
 
-    private static Map<String, String> makeMap(String text, String text2) {
-        HashMap<String, String> map = new HashMap<>();
-        map.put(TITLE, text);
-        map.put(INFO, text2);
-        return map;
-    }
+//    private static Map<String, String> makeMap(String text, String text2) {
+//        HashMap<String, String> map = new HashMap<>();
+//        map.put(TITLE, text);
+//        map.put(INFO, text2);
+//        return map;
+//    }
 
     @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container,
@@ -97,11 +94,22 @@ public class DetailFileFragment extends Fragment implements AdapterView.OnItemCl
         View view = inflater.inflate(R.layout.fragment_detail_file, container, false);
         // Set data adapter for list view, ie associate data with view
         mListView = (AbsListView) view.findViewById(android.R.id.list);
-        ((AdapterView<ListAdapter>) mListView).setAdapter(mAdapter);
+        mListView.setAdapter(mAdapter);
         mListView.setOnItemClickListener(this);
+
+        if (fileList.isEmpty()) {
+            setEmptyText(getString(R.string.empty_list));
+        }
         return view;
     }
 
+    private void setEmptyText(String string) {
+        View emptyView = mListView.getEmptyView();
+
+        if (emptyView instanceof TextView) {
+            ((TextView) emptyView).setText(string);
+        }
+    }
 
 
     @Override
@@ -138,16 +146,10 @@ public class DetailFileFragment extends Fragment implements AdapterView.OnItemCl
     }
 
     public SimpleAdapter addListView(ArrayList<FileInfo> fileList) {
-        // TODO: 10/2/15 not right
-        this.fileInfos = fileList;
         for (FileInfo fileInfo : fileList) {
             this.fileList.add(fileInfo.convertFileMap());
         }
         return mAdapter;
-    }
-
-    public ArrayList<FileInfo> getListView() {
-        return fileInfos;
     }
 
 

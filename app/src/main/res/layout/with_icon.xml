@@ -21,9 +21,8 @@
         android:text="@string/hello_world"
         android:textSize="30sp"
         android:layout_gravity="center_horizontal"
-        android:scrollHorizontally="true"
         android:ellipsize="middle"
-        android:maxLines="1"
+        android:singleLine="true"
         >
     </TextView>
     <!--<TextView-->

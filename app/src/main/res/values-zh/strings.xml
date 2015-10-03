@@ -13,4 +13,5 @@
     <string name="title_activity_transparent_theme">透明</string>
     <string name="action_fragment">显示片段</string>
     <string name="title_activity_with_fragment">使用片段</string>
+    <string name="empty_list">现在还没有文件, 点击添加保存文件</string>
 </resources>

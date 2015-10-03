@@ -41,4 +41,8 @@ public enum Category {
     public static int numCategories() {
         return categories.length;
     }
+
+    public String getName() {
+        return name;
+    }
 }

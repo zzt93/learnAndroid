@@ -21,13 +21,15 @@ public class WithFragment extends Activity implements
     private static String thisClass = WithFragment.class.getCanonicalName();
     private FolderFragment folderFragment;
     private DetailFileFragment detailFragment;
+    private ArrayList<FileInfo> fatherDirInfos = new ArrayList<>();
+    private ArrayList<FileInfo> childDirInfo = new ArrayList<>();
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_with_fragment);
 
-        createIfNotExist(Category.values());
+        createAndInitDir(Category.values(), fatherDirInfos, childDirInfo);
         // Check that the activity is using the layout version with
         // the fragment_container FrameLayout
         if (findViewById(R.id.folder_fragment_container) != null
@@ -41,8 +43,8 @@ public class WithFragment extends Activity implements
             }
 
             // Create a new Fragment to be placed in the activity layout
-            folderFragment = FolderFragment.newInstance("first", "fragment");
-            detailFragment = DetailFileFragment.newInstance("first", "fragment");
+            folderFragment = FolderFragment.newInstance(fatherDirInfos, "fragment");
+            detailFragment = DetailFileFragment.newInstance(childDirInfo, "fragment");
             // In case this activity was started with special instructions from an
             // Intent, pass the Intent's extras to the fragment as arguments
             folderFragment.setArguments(getIntent().getExtras());
@@ -58,8 +60,44 @@ public class WithFragment extends Activity implements
 
     }
 
-    private void createIfNotExist(Category[] values) {
-//        File
+    private void createAndInitDir(Category[] values, ArrayList<FileInfo> fatherDirInfos, ArrayList<FileInfo> childDirInfo) {
+        File dir = this.getBaseDir();
+        for (File file : dir.listFiles()) {
+            System.out.println(file.getName());
+        }
+        for (Category cate : values) {
+            File f = new File(this.getBaseDir(), cate.getName());
+            if (!f.exists()) {
+                boolean res = f.mkdir();
+                if (!res) {
+                    throw new RuntimeException("can't make dir");
+                }
+            }
+            fatherDirInfos.add(new FileInfo(f, R.mipmap.ic_launcher));
+        }
+
+        // init detail file
+        File f = new File(this.getBaseDir(), values[0].getName());
+        collectFile(childDirInfo, f);
+    }
+
+    private void collectFile(ArrayList<FileInfo> childDirInfo, File f) {
+        if (!f.isDirectory()) {
+            return;
+        }
+        for (File file : f.listFiles()) {
+            FileInfo fileInfo;
+            if (file.isFile()) {
+                fileInfo = new FileInfo(file, R.drawable.ic_folder_open_black_24dp);
+            } else {
+                fileInfo = new FileInfo(file, R.drawable.ic_insert_drive_file_black_24dp);
+            }
+            childDirInfo.add(fileInfo);
+        }
+    }
+
+    private File getBaseDir() {
+        return this.getFilesDir();
     }
 
     @Override
@@ -90,15 +128,14 @@ public class WithFragment extends Activity implements
 
 //        DetailFileFragment fileFragment = (DetailFileFragment)
 //                getFragmentManager().findFragmentById(R.id.file_fragment_container);
-        ArrayList<FileInfo> files = folderFragment.getListView();
-        FileInfo fileInfo = files.get(position);
+        FileInfo fileInfo = fatherDirInfos.get(position);
         updateDetailFileInfo(fileInfo.toFile());
     }
 
     private void updateDetailFileInfo(File dir) {
         ArrayList<FileInfo> files = new ArrayList<>();
         if (FirstActivity.debug) {
-            File file = new File(this.getFilesDir(), "test");
+            File file = new File(getBaseDir(), "test");
             try {
                 file.createNewFile();
             } catch (IOException e) {
@@ -106,15 +143,7 @@ public class WithFragment extends Activity implements
             }
             files.add(new FileInfo(file, R.drawable.ic_folder_open_black_24dp));
         }
-        for (File f : dir.listFiles()) {
-            FileInfo fileInfo;
-            if (!f.isDirectory()) {
-                fileInfo = new FileInfo(f, R.drawable.ic_insert_drive_file_black_24dp);
-            } else {
-                fileInfo = new FileInfo(f, R.drawable.ic_folder_open_black_24dp);
-            }
-            files.add(fileInfo);
-        }
+        collectFile(files, dir);
 
         detailFragment.clearListView();
         detailFragment.addListView(files)
@@ -128,11 +157,10 @@ public class WithFragment extends Activity implements
 //        FolderFragment folders = (FolderFragment)
 //                getFragmentManager().findFragmentById(R.id.folder_fragment_container);
 
-        ArrayList<FileInfo> files = detailFragment.getListView();
-        FileInfo fileInfo = files.get(position);
+        FileInfo fileInfo = childDirInfo.get(position);
         if (fileInfo.isDir()) {
             folderFragment.clearListView();
-            folderFragment.addListView(files)
+            folderFragment.addListView(childDirInfo)
                     .notifyDataSetChanged();
 
             updateDetailFileInfo(fileInfo.toFile());

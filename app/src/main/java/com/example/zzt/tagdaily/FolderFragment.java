@@ -53,13 +53,16 @@ public class FolderFragment extends Fragment implements AbsListView.OnItemClickL
      * Views.
      */
     private SimpleAdapter mAdapter;
-    private List<Map<String, String>> category;
+    private List<Map<String, String>> category = new ArrayList<>();
 
-    public static FolderFragment newInstance(String param1, String param2) {
+    public static FolderFragment newInstance(ArrayList<FileInfo> fileInfos, String param2) {
         FolderFragment fragment = new FolderFragment();
         Bundle args = new Bundle();
-        args.putString(ARG_PARAM1, param1);
         args.putString(ARG_PARAM2, param2);
+
+        for (FileInfo fileInfo : fileInfos) {
+            fragment.category.add(fileInfo.convertFolderMap());
+        }
         fragment.setArguments(args);
         return fragment;
     }
@@ -84,12 +87,7 @@ public class FolderFragment extends Fragment implements AbsListView.OnItemClickL
         }
 
 
-//        mAdapter = new ArrayAdapter<>(getActivity(),
-//                R.layout.with_icon, R.id.label, DummyContent.ITEMS);
-//        mAdapter = new ArrayAdapter<>(getActivity(),
-//                android.R.layout.simple_list_item_1, android.R.id.text1, DummyContent.ITEMS);
-        category = new ArrayList<>();
-        init_category(category);
+//        init_category(category);
         /*
             using `String[i]` as index, to find resource in `List<Map<String, >>`
             to fit into `R.id.xxx`
@@ -99,6 +97,11 @@ public class FolderFragment extends Fragment implements AbsListView.OnItemClickL
                 R.layout.with_icon,
                 new String[]{LOGO, NAME},
                 new int[]{R.id.logo, R.id.label});
+
+//        mAdapter = new ArrayAdapter<>(getActivity(),
+//                R.layout.with_icon, R.id.label, DummyContent.ITEMS);
+//        mAdapter = new ArrayAdapter<>(getActivity(),
+//                android.R.layout.simple_list_item_1, android.R.id.text1, DummyContent.ITEMS);
     }
 
     private void init_category(List<Map<String, String>> category) {
@@ -126,9 +129,9 @@ public class FolderFragment extends Fragment implements AbsListView.OnItemClickL
         ((AdapterView<ListAdapter>) mListView).setAdapter(mAdapter);
         mListView.setOnItemClickListener(this);
 
-//        secListView = (AbsListView) view.findViewById(android.R.id.empty);
-//        ((AdapterView<ListAdapter>) secListView).setAdapter(mAdapter);
-
+        if (category.isEmpty()) {
+            setEmptyText(getString(R.string.empty_list));
+        }
 
         return view;
     }
@@ -180,7 +183,6 @@ public class FolderFragment extends Fragment implements AbsListView.OnItemClickL
         for (FileInfo file : files) {
             category.add(file.convertFolderMap());
         }
-//        category.add(Category.makeMap(0));
         return mAdapter;
     }
 
@@ -189,10 +191,6 @@ public class FolderFragment extends Fragment implements AbsListView.OnItemClickL
         return mAdapter;
     }
 
-    public ArrayList<FileInfo> getListView() {
-        // TODO: 10/2/15 where
-        return null;
-    }
 
     /**
      * This interface must be implemented by activities that contain this
