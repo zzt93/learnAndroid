@@ -1,14 +1,10 @@
 package com.example.zzt.tagdaily.logic;
 
-import com.example.zzt.tagdaily.DetailFileFragment;
-import com.example.zzt.tagdaily.FolderFragment;
-
 import java.io.File;
 import java.text.DateFormat;
 import java.text.SimpleDateFormat;
 import java.util.Date;
 import java.util.HashMap;
-import java.util.Map;
 
 /**
  * Created by zzt on 10/2/15.
@@ -16,6 +12,10 @@ import java.util.Map;
  * Usage:
  */
 public class FileInfo {
+    public static final String NAME = "name";
+    public static final String LOGO = "logo";
+    public static final String LAST_MODIFIED = "lastModify";
+
     private static DateFormat sdf = SimpleDateFormat.getDateTimeInstance();
     private File file;
     private int id;
@@ -27,15 +27,15 @@ public class FileInfo {
 
     public HashMap<String, String> convertFileMap() {
         HashMap<String, String> map = new HashMap<>();
-        map.put(DetailFileFragment.TITLE, file.getName());
-        map.put(DetailFileFragment.INFO, sdf.format(new Date(file.lastModified())));
+        map.put(NAME, file.getName());
+        map.put(LAST_MODIFIED, sdf.format(new Date(file.lastModified())));
         return map;
     }
 
     public HashMap<String, String> convertFolderMap() {
         HashMap<String, String> map = new HashMap<>();
-        map.put(FolderFragment.LOGO, "" + id);
-        map.put(FolderFragment.NAME, file.getName());
+        map.put(LOGO, "" + id);
+        map.put(NAME, file.getName());
         return map;
     }
 

@@ -1,6 +1,5 @@
 package com.example.zzt.tagdaily.logic;
 
-import com.example.zzt.tagdaily.FolderFragment;
 import com.example.zzt.tagdaily.R;
 
 import java.util.HashMap;
@@ -32,9 +31,9 @@ public enum Category {
     public static HashMap<String, String> makeMap(int i) {
         Category category = categories[i];
         HashMap<String, String> map = new HashMap<>();
-        map.put(FolderFragment.LOGO, "" + category.id);
-        map.put(FolderFragment.NAME, category.name);
-//        map.put(FolderFragment.DESCRIPTION2, category.desc);
+        map.put(FileInfo.LOGO, "" + category.id);
+        map.put(FileInfo.NAME, category.name);
+//        map.put(FolderFragment.LAST_MODIFIED, category.desc);
         return map;
     }
 

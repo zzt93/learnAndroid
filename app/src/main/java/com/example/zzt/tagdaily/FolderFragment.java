@@ -12,7 +12,6 @@ import android.widget.ListAdapter;
 import android.widget.SimpleAdapter;
 import android.widget.TextView;
 
-import com.example.zzt.tagdaily.logic.Category;
 import com.example.zzt.tagdaily.logic.FileInfo;
 
 import java.util.ArrayList;
@@ -31,15 +30,6 @@ import java.util.Map;
 public class FolderFragment extends Fragment implements AbsListView.OnItemClickListener {
 
 
-    // the fragment initialization parameters, e.g. ARG_ITEM_NUMBER
-    private static final String ARG_PARAM1 = "param1";
-    private static final String ARG_PARAM2 = "param2";
-    public static final String NAME = "label";
-    public static final String LOGO = "logo";
-    public static final String DESCRIPTION2 = "label2";
-
-    private String mParam2 = "";
-
     private FolderFragmentInteractionListener mListener;
 
     /**
@@ -54,15 +44,23 @@ public class FolderFragment extends Fragment implements AbsListView.OnItemClickL
      */
     private SimpleAdapter mAdapter;
     private List<Map<String, String>> category = new ArrayList<>();
+    private int layoutId;
+    private String[] names;
+    private int[] ids;
 
-    public static FolderFragment newInstance(ArrayList<FileInfo> fileInfos, String param2) {
+    public static FolderFragment newInstance(ArrayList<FileInfo> fileInfos, int layoutId,
+                                             String[] names, int[] ids) {
         FolderFragment fragment = new FolderFragment();
         Bundle args = new Bundle();
-        args.putString(ARG_PARAM2, param2);
+        fragment.layoutId = layoutId;
+        fragment.names = names;
+        fragment.ids = ids;
 
         for (FileInfo fileInfo : fileInfos) {
             fragment.category.add(fileInfo.convertFolderMap());
         }
+
+        // give the data when onCreate() invoke need
         fragment.setArguments(args);
         return fragment;
     }
@@ -76,15 +74,12 @@ public class FolderFragment extends Fragment implements AbsListView.OnItemClickL
 
     /**
      * prepare data for the fragment to show
+     *
      * @param savedInstanceState -- saved state
      */
     @Override
     public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-
-        if (getArguments() != null) {
-            mParam2 = getArguments().getString(ARG_PARAM2);
-        }
 
 
 //        init_category(category);
@@ -94,9 +89,9 @@ public class FolderFragment extends Fragment implements AbsListView.OnItemClickL
          */
         mAdapter = new SimpleAdapter(getActivity(),
                 category,
-                R.layout.with_icon,
-                new String[]{LOGO, NAME},
-                new int[]{R.id.logo, R.id.label});
+                layoutId,
+                names,
+                ids);
 
 //        mAdapter = new ArrayAdapter<>(getActivity(),
 //                R.layout.with_icon, R.id.label, DummyContent.ITEMS);
@@ -104,18 +99,20 @@ public class FolderFragment extends Fragment implements AbsListView.OnItemClickL
 //                android.R.layout.simple_list_item_1, android.R.id.text1, DummyContent.ITEMS);
     }
 
-    private void init_category(List<Map<String, String>> category) {
-        for (int i = 0; i < Category.numCategories(); i++) {
-            category.add(Category.makeMap(i));
-        }
-    }
+
+//    private void init_category(List<Map<String, String>> category) {
+//        for (int i = 0; i < Category.numCategories(); i++) {
+//            category.add(Category.makeMap(i));
+//        }
+//    }
 
 
     /**
      * set the relation between data and view for it to show
      * add listener
-     * @param inflater -- which make view from xml
-     * @param container -- the ViewGroup to hold this view
+     *
+     * @param inflater           -- which make view from xml
+     * @param container          -- the ViewGroup to hold this view
      * @param savedInstanceState -- saved state
      * @return created view
      */
@@ -154,8 +151,6 @@ public class FolderFragment extends Fragment implements AbsListView.OnItemClickL
     }
 
 
-
-
     /**
      * The default content for this Fragment has a TextView that is shown when
      * the list is empty. If you would like to change the text, call this method
@@ -171,7 +166,6 @@ public class FolderFragment extends Fragment implements AbsListView.OnItemClickL
 
     @Override
     public void onItemClick(AdapterView<?> parent, View view, int position, long id) {
-        System.out.println(mParam2);
         if (null != mListener) {
             // Notify the active callbacks interface (the activity, if the
             // fragment is attached to one) that an item has been selected.

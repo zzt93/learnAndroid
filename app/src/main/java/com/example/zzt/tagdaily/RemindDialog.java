@@ -1,16 +1,29 @@
 package com.example.zzt.tagdaily;
 
 import android.app.Activity;
+import android.content.Intent;
 import android.os.Bundle;
 import android.view.Menu;
 import android.view.MenuItem;
+import android.widget.TextView;
 
 public class RemindDialog extends Activity {
+
+    public static final String REMIND_MSG = "remind msg";
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_remind_dialog);
+
+        Intent intent = getIntent();
+        String msg = intent.getStringExtra(REMIND_MSG);
+        if (null == msg) {
+            return;
+        }
+        TextView textView = (TextView) findViewById(R.id.remind_text_view);
+        textView.setTextSize(30);
+        textView.setText(msg);
     }
 
     @Override
@@ -28,7 +41,7 @@ public class RemindDialog extends Activity {
         int id = item.getItemId();
 
         //noinspection SimplifiableIfStatement
-        if (id == R.id.action_settings) {
+        if (id == R.id.with_action_settings) {
             return true;
         }
 

@@ -45,13 +45,20 @@
         <activity
             android:name=".WithFragment"
             android:label="@string/title_activity_with_fragment"
-            android:theme="@style/MainTheme"
-            android:parentActivityName=".FirstActivity" >
+            android:parentActivityName=".FirstActivity"
+            android:theme="@style/MainTheme" >
             <meta-data
                 android:name="android.support.PARENT_ACTIVITY"
                 android:value="com.example.zzt.tagdaily.FirstActivity" />
         </activity>
+        <activity
+            android:name=".fileChooser.FilerChooser"
+            android:label="@string/title_activity_filer_chooser"
+            android:parentActivityName=".WithFragment" >
+            <meta-data
+                android:name="android.support.PARENT_ACTIVITY"
+                android:value="com.example.zzt.tagdaily.WithFragment" />
+        </activity>
     </application>
-
 
 </manifest>

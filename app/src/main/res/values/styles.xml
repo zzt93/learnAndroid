@@ -8,7 +8,7 @@
         <item name="android:actionMenuTextAppearance">@style/MyMenuTextAppearance</item>
 
         <!-- 'add and setting' color -->
-        <item name="android:actionMenuTextColor">@color/Black</item>
+        <item name="android:actionMenuTextColor">@color/White</item>
     </style>
 
 

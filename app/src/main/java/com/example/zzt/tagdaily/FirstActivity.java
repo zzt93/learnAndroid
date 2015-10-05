@@ -47,13 +47,13 @@ public class FirstActivity extends Activity {
     public boolean onOptionsItemSelected(MenuItem item) {
         // Handle presses on the action bar items
         switch (item.getItemId()) {
-            case R.id.action_search:
+            case R.id.with_action_search:
                 if (debug) {
                     Log.d(thisClass, "action search");
                 }
 //                openSearch();
                 return true;
-            case R.id.action_add:
+            case R.id.with_action_add:
                 if (debug) {
                     Log.d(thisClass, "action add");
                 }

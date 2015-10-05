@@ -28,7 +28,7 @@ public class TransparentTheme extends Activity {
         int id = item.getItemId();
 
         //noinspection SimplifiableIfStatement
-        if (id == R.id.action_settings) {
+        if (id == R.id.with_action_settings) {
             return true;
         }
 

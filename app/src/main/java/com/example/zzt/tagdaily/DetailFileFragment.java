@@ -28,8 +28,6 @@ import java.util.Map;
  * create an instance of this fragment.
  */
 public class DetailFileFragment extends Fragment implements AdapterView.OnItemClickListener {
-    public static final String TITLE = "title";
-    public static final String INFO = "info";
     // the fragment initialization parameters, e.g. ARG_ITEM_NUMBER
 //    private static final String ARG_PARAM1 = "param1";
 //    private static final String ARG_PARAM2 = "param2";
@@ -76,7 +74,7 @@ public class DetailFileFragment extends Fragment implements AdapterView.OnItemCl
         mAdapter = new SimpleAdapter(getActivity(),
                 fileList,
                 R.layout.file_info,
-                new String[]{TITLE, INFO},
+                new String[]{FileInfo.NAME, FileInfo.LAST_MODIFIED},
                 new int[]{R.id.file_title, R.id.file_info});
     }
 

@@ -2,17 +2,23 @@ package com.example.zzt.tagdaily;
 
 import android.app.Activity;
 import android.app.FragmentTransaction;
+import android.content.Intent;
+import android.content.pm.PackageManager;
+import android.net.Uri;
 import android.os.Bundle;
 import android.util.Log;
 import android.view.Menu;
 import android.view.MenuItem;
 
 import com.example.zzt.tagdaily.logic.Category;
+import com.example.zzt.tagdaily.logic.Crypt;
+import com.example.zzt.tagdaily.logic.Default;
 import com.example.zzt.tagdaily.logic.FileInfo;
 
 import java.io.File;
 import java.io.IOException;
 import java.util.ArrayList;
+import java.util.List;
 
 public class WithFragment extends Activity implements
         FolderFragment.FolderFragmentInteractionListener,
@@ -43,7 +49,11 @@ public class WithFragment extends Activity implements
             }
 
             // Create a new Fragment to be placed in the activity layout
-            folderFragment = FolderFragment.newInstance(fatherDirInfos, "fragment");
+            folderFragment = FolderFragment.newInstance(
+                    fatherDirInfos, R.layout.with_icon,
+                    new String[]{FileInfo.LOGO, FileInfo.NAME},
+                    new int[]{R.id.logo, R.id.desc1}
+            );
             detailFragment = DetailFileFragment.newInstance(childDirInfo, "fragment");
             // In case this activity was started with special instructions from an
             // Intent, pass the Intent's extras to the fragment as arguments
@@ -77,11 +87,11 @@ public class WithFragment extends Activity implements
         }
 
         // init detail file
-        File f = new File(this.getBaseDir(), values[0].getName());
+        File f = new File(this.getBaseDir(), values[Default.DEFAULT_FOLDER].getName());
         collectFile(childDirInfo, f);
     }
 
-    private void collectFile(ArrayList<FileInfo> childDirInfo, File f) {
+    public static void collectFile(ArrayList<FileInfo> childDirInfo, File f) {
         if (!f.isDirectory()) {
             return;
         }
@@ -114,12 +124,42 @@ public class WithFragment extends Activity implements
         // as you specify a parent activity in AndroidManifest.xml.
         int id = item.getItemId();
 
-        //noinspection SimplifiableIfStatement
-        if (id == R.id.action_settings) {
-            return true;
+        switch (id) {
+            case R.id.with_action_search:
+                break;
+            case R.id.with_action_add:
+                // show chooser to show file
+                Uri path = Uri.fromFile(getBaseDir());
+                Intent intent = new Intent(Intent.ACTION_VIEW, path);
+                String title = getResources().getString(R.string.chooser_title);
+                // Create intent to show chooser
+                Intent chooser = Intent.createChooser(intent, title);
+
+                if (intentSafe(intent)) {
+                    startActivity(chooser);
+                    // create link under the related folder
+                    // encrypt that file under original folder delete that file??
+
+                } else {
+                    // remind use that no apps to open to add
+                    Intent remind = new Intent(this, RemindDialog.class);
+                    remind.putExtra(RemindDialog.REMIND_MSG, "no app to open root directory");
+                    startActivity(remind);
+                }
+                break;
+            case R.id.with_action_settings:
+                break;
         }
 
         return super.onOptionsItemSelected(item);
+    }
+
+    private boolean intentSafe(Intent intent) {
+        //intent.resolveActivity(getPackageManager()) != null
+        PackageManager packageManager = getPackageManager();
+        List activities = packageManager.queryIntentActivities(intent,
+                PackageManager.MATCH_DEFAULT_ONLY);
+        return activities.size() > 0;
     }
 
     @Override
@@ -157,6 +197,9 @@ public class WithFragment extends Activity implements
 //        FolderFragment folders = (FolderFragment)
 //                getFragmentManager().findFragmentById(R.id.folder_fragment_container);
 
+        if (position >= childDirInfo.size()) {
+            return;
+        }
         FileInfo fileInfo = childDirInfo.get(position);
         if (fileInfo.isDir()) {
             folderFragment.clearListView();
@@ -165,7 +208,20 @@ public class WithFragment extends Activity implements
 
             updateDetailFileInfo(fileInfo.toFile());
         } else {
-            // de-encrypt file and show it
+            // decrypt file and show it
+            Crypt.decrypt(fileInfo.toFile());
+            // show chooser to show file
+            Uri path = Uri.fromFile(fileInfo.toFile());
+            Intent intent = new Intent(Intent.ACTION_VIEW, path);
+            String title = getResources().getString(R.string.chooser_title);
+            // Create intent to show chooser
+            Intent chooser = Intent.createChooser(intent, title);
+
+            if (intentSafe(intent)) {
+                startActivity(chooser);
+            }
         }
     }
+
+
 }
