@@ -1,17 +1,19 @@
 package com.example.zzt.tagdaily.logic;
 
-import android.content.Context;
+import android.util.Log;
 
 import java.io.BufferedReader;
 import java.io.File;
-import java.io.FileInputStream;
 import java.io.FileNotFoundException;
 import java.io.FileOutputStream;
 import java.io.FileReader;
 import java.io.IOException;
-import java.io.InputStreamReader;
 import java.io.OutputStreamWriter;
-import java.util.ArrayList;
+import java.security.NoSuchAlgorithmException;
+
+import javax.crypto.Cipher;
+import javax.crypto.CipherOutputStream;
+import javax.crypto.NoSuchPaddingException;
 
 /**
  * Created by zzt on 10/6/15.
@@ -54,7 +56,19 @@ public class FileLogic {
         return original.substring(original.lastIndexOf(File.separator));
     }
 
-    public void encrypt() {
+    public void encrypt()
+            throws FileNotFoundException {
+        Cipher des = null;
+        try {
+            des = Cipher.getInstance(Default.CRYPT_DES + "/CBC/PKCS5Padding");
+        } catch (NoSuchAlgorithmException e) {
+            Log.e("", "wrong Cipher argument" + e);
+        } catch (NoSuchPaddingException e) {
+            e.printStackTrace();
+        }
+        FileOutputStream outputStream = new FileOutputStream(path);
+        CipherOutputStream cipherOutputStream
+                = new CipherOutputStream(outputStream, des);
 
     }
 

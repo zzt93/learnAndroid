@@ -17,6 +17,7 @@ import com.example.zzt.tagdaily.logic.FileLogic;
 import com.example.zzt.tagdaily.logic.UriUtility;
 
 import java.io.File;
+import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
@@ -179,7 +180,11 @@ public class WithFragment extends Activity implements
                     return;
                 }
                 // encrypt that file under original folder and delete original file??
-                file.encrypt();
+                try {
+                    file.encrypt();
+                } catch (FileNotFoundException e) {
+                    Log.e(thisClass, "File write failed: " + e.toString());
+                }
             }
         }
     }
@@ -255,7 +260,11 @@ public class WithFragment extends Activity implements
             if (intentSafe(intent)) {
                 startActivity(intent);
             }
-            fileLogic.encrypt();
+            try {
+                fileLogic.encrypt();
+            } catch (FileNotFoundException e) {
+                Log.e(thisClass, "" + e);
+            }
         }
     }
 //
