@@ -2,10 +2,12 @@ package com.example.zzt.tagdaily.fileChooser;
 
 import android.app.Activity;
 import android.app.FragmentTransaction;
+import android.content.Intent;
 import android.os.Bundle;
 import android.os.Environment;
 import android.view.Menu;
 import android.view.MenuItem;
+import android.widget.Toast;
 
 import com.example.zzt.tagdaily.FolderFragment;
 import com.example.zzt.tagdaily.R;
@@ -58,7 +60,7 @@ public class FilerChooser extends Activity {
         WithFragment.collectFile(fatherDirInfos, fileChooserBaseDir());
     }
 
-    private static File fileChooserBaseDir() {
+    public static File fileChooserBaseDir() {
         return Environment.getDataDirectory();
     }
 
@@ -83,4 +85,34 @@ public class FilerChooser extends Activity {
 
         return super.onOptionsItemSelected(item);
     }
+
+
+//    public void openFile(String minmeType) {
+//
+//        Intent intent = new Intent(Intent.ACTION_GET_CONTENT);
+//        intent.setType(minmeType);
+//        intent.addCategory(Intent.CATEGORY_OPENABLE);
+//
+//        // special intent for Samsung file manager
+//        Intent sIntent = new Intent("com.sec.android.app.myfiles.PICK_DATA");
+//        // if you want any file type, you can skip next line
+//        sIntent.putExtra("CONTENT_TYPE", minmeType);
+//        sIntent.addCategory(Intent.CATEGORY_DEFAULT);
+//
+//        Intent chooserIntent;
+//        if (getPackageManager().resolveActivity(sIntent, 0) != null){
+//            // it is device with samsung file manager
+//            chooserIntent = Intent.createChooser(sIntent, "Open file");
+//            chooserIntent.putExtra(Intent.EXTRA_INITIAL_INTENTS, new Intent[] { intent});
+//        }
+//        else {
+//            chooserIntent = Intent.createChooser(intent, "Open file");
+//        }
+//
+//        try {
+//            startActivityForResult(chooserIntent, CHOOSE_FILE_REQUESTCODE);
+//        } catch (android.content.ActivityNotFoundException ex) {
+//            Toast.makeText(getApplicationContext(), "No suitable File Manager was found.", Toast.LENGTH_SHORT).show();
+//        }
+//    }
 }

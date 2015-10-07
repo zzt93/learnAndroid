@@ -11,9 +11,10 @@ import android.view.Menu;
 import android.view.MenuItem;
 
 import com.example.zzt.tagdaily.logic.Category;
-import com.example.zzt.tagdaily.logic.Crypt;
 import com.example.zzt.tagdaily.logic.Default;
 import com.example.zzt.tagdaily.logic.FileInfo;
+import com.example.zzt.tagdaily.logic.FileLogic;
+import com.example.zzt.tagdaily.logic.UriUtility;
 
 import java.io.File;
 import java.io.IOException;
@@ -24,10 +25,12 @@ public class WithFragment extends Activity implements
         FolderFragment.FolderFragmentInteractionListener,
         DetailFileFragment.DetailFragmentInteractionListener {
 
+    private static final int PICK_FILE_REQUEST_CODE = 1;
     private static String thisClass = WithFragment.class.getCanonicalName();
     private FolderFragment folderFragment;
     private DetailFileFragment detailFragment;
     private ArrayList<FileInfo> fatherDirInfos = new ArrayList<>();
+    private int fatherIndex = Default.DEFAULT_FOLDER;
     private ArrayList<FileInfo> childDirInfo = new ArrayList<>();
 
     @Override
@@ -97,7 +100,7 @@ public class WithFragment extends Activity implements
         }
         for (File file : f.listFiles()) {
             FileInfo fileInfo;
-            if (file.isFile()) {
+            if (file.isDirectory()) {
                 fileInfo = new FileInfo(file, R.drawable.ic_folder_open_black_24dp);
             } else {
                 fileInfo = new FileInfo(file, R.drawable.ic_insert_drive_file_black_24dp);
@@ -129,17 +132,11 @@ public class WithFragment extends Activity implements
                 break;
             case R.id.with_action_add:
                 // show chooser to show file
-                Uri path = Uri.fromFile(getBaseDir());
-                Intent intent = new Intent(Intent.ACTION_VIEW, path);
-                String title = getResources().getString(R.string.chooser_title);
-                // Create intent to show chooser
-                Intent chooser = Intent.createChooser(intent, title);
-
+                Intent intent = new Intent(Intent.ACTION_GET_CONTENT);
+                // TODO show different app to add -- a global var to remember now category
+                prepareType(intent);
                 if (intentSafe(intent)) {
-                    startActivity(chooser);
-                    // create link under the related folder
-                    // encrypt that file under original folder delete that file??
-
+                    startActivityForResult(intent, PICK_FILE_REQUEST_CODE);
                 } else {
                     // remind use that no apps to open to add
                     Intent remind = new Intent(this, RemindDialog.class);
@@ -154,6 +151,43 @@ public class WithFragment extends Activity implements
         return super.onOptionsItemSelected(item);
     }
 
+    /**
+     * prepare the intent for pick some file
+     * <p/>
+     * the app should show: camera, music, media, file manager
+     *
+     * @param intent The intent
+     */
+    private void prepareType(Intent intent) {
+        intent.setType("*/*");
+    }
+
+    @Override
+    protected void onActivityResult(int requestCode, int resultCode, Intent data) {
+        if (requestCode == PICK_FILE_REQUEST_CODE) {
+            if (resultCode == RESULT_OK) {
+                Uri fileUri = data.getData();
+                // create a file save the content under the related folder
+                // TODO: 10/7/15 getPath ?
+                String path = UriUtility.getPath(this, fileUri);
+                String name = FileLogic.getNameFromPath(path);
+                FileLogic file;
+                try {
+                    file = new FileLogic(new File(currentSelectedDir(), name), path);
+                } catch (IOException e) {
+                    Log.e(thisClass, "File write failed: " + e.toString());
+                    return;
+                }
+                // encrypt that file under original folder and delete original file??
+                file.encrypt();
+            }
+        }
+    }
+
+    private File currentSelectedDir() {
+        return currentSelectedFile(fatherDirInfos, fatherIndex);
+    }
+
     private boolean intentSafe(Intent intent) {
         //intent.resolveActivity(getPackageManager()) != null
         PackageManager packageManager = getPackageManager();
@@ -164,7 +198,10 @@ public class WithFragment extends Activity implements
 
     @Override
     public void folderFragmentClick(int position) {
+        // TODO: 10/7/15 long time press
         Log.d(thisClass, position + " is choose");
+
+        fatherIndex = position;
 
 //        DetailFileFragment fileFragment = (DetailFileFragment)
 //                getFragmentManager().findFragmentById(R.id.file_fragment_container);
@@ -174,15 +211,7 @@ public class WithFragment extends Activity implements
 
     private void updateDetailFileInfo(File dir) {
         ArrayList<FileInfo> files = new ArrayList<>();
-        if (FirstActivity.debug) {
-            File file = new File(getBaseDir(), "test");
-            try {
-                file.createNewFile();
-            } catch (IOException e) {
-                e.printStackTrace();
-            }
-            files.add(new FileInfo(file, R.drawable.ic_folder_open_black_24dp));
-        }
+
         collectFile(files, dir);
 
         detailFragment.clearListView();
@@ -192,6 +221,7 @@ public class WithFragment extends Activity implements
 
     @Override
     public void detailFragmentClick(int position) {
+        // TODO: 10/7/15 handle long time press
         Log.d(thisClass, position + " is choose");
 
 //        FolderFragment folders = (FolderFragment)
@@ -209,19 +239,35 @@ public class WithFragment extends Activity implements
             updateDetailFileInfo(fileInfo.toFile());
         } else {
             // decrypt file and show it
-            Crypt.decrypt(fileInfo.toFile());
-            // show chooser to show file
-            Uri path = Uri.fromFile(fileInfo.toFile());
-            Intent intent = new Intent(Intent.ACTION_VIEW, path);
-            String title = getResources().getString(R.string.chooser_title);
-            // Create intent to show chooser
-            Intent chooser = Intent.createChooser(intent, title);
+            FileLogic fileLogic;
+            try {
+                fileLogic = new FileLogic(fileInfo.toFile());
+            } catch (IOException e) {
+                Log.e(thisClass, "can't read file" + e);
+                return;
+            }
+            fileLogic.decrypt();
+            Uri path = Uri.parse(fileLogic.getPath());
+            Intent intent = new Intent(Intent.ACTION_VIEW);
+            // TODO set type by suffix
+            intent.setDataAndType(path, "*/*");
 
             if (intentSafe(intent)) {
-                startActivity(chooser);
+                startActivity(intent);
             }
+            fileLogic.encrypt();
         }
     }
+//
+//    public Intent setIntentChooser(Intent intent, Uri path, String type) {
+//        intent.setDataAndType(path, type);
+//        String title = getResources().getString(R.string.chooser_title);
+//        // Create intent to show chooser
+//        return Intent.createChooser(intent, title);
+//    }
 
 
+    public File currentSelectedFile(ArrayList<FileInfo> fileInfos, int index) {
+        return fileInfos.get(index).toFile();
+    }
 }

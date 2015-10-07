@@ -13,7 +13,7 @@ import android.widget.EditText;
 public class FirstActivity extends Activity {
 
     public static final String EXTRA_MESSAGE = "com.example.zzt.tagdaily.MESSAGE";
-    public static boolean debug = true;
+    public static boolean debug = false;
     private static String thisClass = FirstActivity.class.getName();
 
     /**

@@ -1,6 +1,7 @@
 package com.example.zzt.tagdaily.logic;
 
-import java.io.File;
+
+import java.util.ArrayList;
 
 /**
  * Created by zzt on 10/5/15.
@@ -9,11 +10,14 @@ import java.io.File;
  */
 public class Crypt {
 
-    public static void decrypt(File file) {
-
+    public static ArrayList<String> decrypt(ArrayList<String> content) {
+        ArrayList<String> res = new ArrayList<>();
+        return res;
     }
 
-    public static void encrypt(File file) {
-
+    public static ArrayList<String> encrypt(ArrayList<String> content) {
+        ArrayList<String> res = new ArrayList<>();
+        return res;
     }
+
 }
