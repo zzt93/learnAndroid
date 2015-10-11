@@ -31,8 +31,13 @@ public class FileLogic {
 
     public FileLogic(File file, String path) throws IOException {
         this.file = file;
+        /**
+         * when will file already exist:
+         *  1. re-add a already added file
+         *  2. reuse a added
+         */
         if (file.exists()) {
-            return;
+            existFileLogic(file);
         }
         this.path = path;
         OutputStreamWriter outputStreamWriter = new OutputStreamWriter(new FileOutputStream(file), "utf-8");
@@ -42,10 +47,14 @@ public class FileLogic {
     }
 
     public FileLogic(File file) throws IOException {
-        this.file = file;
         if (!file.exists()) {
             throw new RuntimeException("Invalid FileLogic");
         }
+        existFileLogic(file);
+    }
+
+    private void existFileLogic(File file) throws IOException {
+        this.file = file;
         BufferedReader br = new BufferedReader(new FileReader(file));
         path = br.readLine();
         br.close();
@@ -53,20 +62,34 @@ public class FileLogic {
 
 
     public static String getNameFromPath(String original) {
-        return original.substring(original.lastIndexOf(File.separator));
+        return original.substring(original.lastIndexOf(File.separator) + 1);
     }
+
+    public static String getDirFromPath(String original) {
+        return original.substring(0, original.lastIndexOf(File.separator));
+    }
+    public static String[] getDirNameFromPath(String original) {
+        int lastIndexOf = original.lastIndexOf(File.separator);
+        return new String[]{
+                original.substring(0, lastIndexOf),
+                original.substring(lastIndexOf + 1)
+        };
+    }
+
+
 
     public void encrypt()
             throws FileNotFoundException {
         Cipher des = null;
         try {
-            des = Cipher.getInstance(Default.CRYPT_DES + "/CBC/PKCS5Padding");
-        } catch (NoSuchAlgorithmException e) {
+            des = Cipher.getInstance(Crypt.CRYPT_ALGO + "/CBC/PKCS5Padding");
+        } catch (NoSuchAlgorithmException | NoSuchPaddingException e) {
             Log.e("", "wrong Cipher argument" + e);
-        } catch (NoSuchPaddingException e) {
-            e.printStackTrace();
         }
-        FileOutputStream outputStream = new FileOutputStream(path);
+        // TODO encrypt that file under original folder and delete original file??
+        String[] dirNameFromPath = getDirNameFromPath(path);
+        String newPath = dirNameFromPath[0] + Default.DEFAULT_PREFIX + dirNameFromPath[1];
+        FileOutputStream outputStream = new FileOutputStream(newPath);
         CipherOutputStream cipherOutputStream
                 = new CipherOutputStream(outputStream, des);
 

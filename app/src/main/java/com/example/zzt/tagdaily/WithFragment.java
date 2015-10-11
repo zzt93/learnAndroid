@@ -31,7 +31,7 @@ public class WithFragment extends Activity implements
     private FolderFragment folderFragment;
     private DetailFileFragment detailFragment;
     private ArrayList<FileInfo> fatherDirInfos = new ArrayList<>();
-    private int fatherIndex = Default.DEFAULT_FOLDER;
+    private int fatherIndex = Default.DEFAULT_FOLDER_I;
     private ArrayList<FileInfo> childDirInfo = new ArrayList<>();
 
     @Override
@@ -91,7 +91,7 @@ public class WithFragment extends Activity implements
         }
 
         // init detail file
-        File f = new File(this.getBaseDir(), values[Default.DEFAULT_FOLDER].getName());
+        File f = new File(this.getBaseDir(), values[Default.DEFAULT_FOLDER_I].getName());
         collectFile(childDirInfo, f);
     }
 
@@ -179,12 +179,12 @@ public class WithFragment extends Activity implements
                     Log.e(thisClass, "File write failed: " + e.toString());
                     return;
                 }
-                // encrypt that file under original folder and delete original file??
                 try {
                     file.encrypt();
                 } catch (FileNotFoundException e) {
                     Log.e(thisClass, "File write failed: " + e.toString());
                 }
+                folderFragmentClick(fatherIndex);
             }
         }
     }
