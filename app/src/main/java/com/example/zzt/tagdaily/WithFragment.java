@@ -13,12 +13,16 @@ import android.view.MenuItem;
 import com.example.zzt.tagdaily.logic.Category;
 import com.example.zzt.tagdaily.logic.Default;
 import com.example.zzt.tagdaily.logic.FileInfo;
-import com.example.zzt.tagdaily.logic.FileLogic;
+import com.example.zzt.tagdaily.logic.FileLink;
 import com.example.zzt.tagdaily.logic.UriUtility;
 
 import java.io.File;
-import java.io.FileNotFoundException;
 import java.io.IOException;
+import java.security.InvalidAlgorithmParameterException;
+import java.security.InvalidKeyException;
+import java.security.KeyStoreException;
+import java.security.NoSuchAlgorithmException;
+import java.security.UnrecoverableEntryException;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -165,27 +169,27 @@ public class WithFragment extends Activity implements
 
     @Override
     protected void onActivityResult(int requestCode, int resultCode, Intent data) {
-        if (requestCode == PICK_FILE_REQUEST_CODE) {
-            if (resultCode == RESULT_OK) {
-                Uri fileUri = data.getData();
-                // create a file save the content under the related folder
-                // TODO: 10/7/15 getPath ?
-                String path = UriUtility.getPath(this, fileUri);
-                String name = FileLogic.getNameFromPath(path);
-                FileLogic file;
-                try {
-                    file = new FileLogic(new File(currentSelectedDir(), name), path);
-                } catch (IOException e) {
-                    Log.e(thisClass, "File write failed: " + e.toString());
-                    return;
-                }
-                try {
-                    file.encrypt();
-                } catch (FileNotFoundException e) {
-                    Log.e(thisClass, "File write failed: " + e.toString());
-                }
-                folderFragmentClick(fatherIndex);
+        if (requestCode == PICK_FILE_REQUEST_CODE) if (resultCode == RESULT_OK) {
+            Uri fileUri = data.getData();
+            // create a file save the content under the related folder
+            // TODO: 10/7/15 getPath ?
+            String path = UriUtility.getPath(this, fileUri);
+            String name = FileLink.getNameFromPath(path);
+            FileLink file;
+            try {
+                file = new FileLink(new File(currentSelectedDir(), name), path);
+            } catch (IOException | NoSuchAlgorithmException | KeyStoreException e) {
+                Log.e(thisClass, "File write failed: " + e.toString());
+                return;
             }
+            try {
+                file.encrypt();
+            } catch (IOException e) {
+                Log.e(thisClass, "File write failed: " + e.toString());
+            } catch (NoSuchAlgorithmException | UnrecoverableEntryException | KeyStoreException | InvalidKeyException e) {
+                e.printStackTrace();
+            }
+            folderFragmentClick(fatherIndex);
         }
     }
 
@@ -244,15 +248,29 @@ public class WithFragment extends Activity implements
             updateDetailFileInfo(fileInfo.toFile());
         } else {
             // decrypt file and show it
-            FileLogic fileLogic;
+            FileLink fileLink;
             try {
-                fileLogic = new FileLogic(fileInfo.toFile());
+                fileLink = new FileLink(fileInfo.toFile());
             } catch (IOException e) {
                 Log.e(thisClass, "can't read file" + e);
                 return;
             }
-            fileLogic.decrypt();
-            Uri path = Uri.parse(fileLogic.getPath());
+            try {
+                fileLink.decryptAll();
+            } catch (InvalidAlgorithmParameterException e) {
+                e.printStackTrace();
+            } catch (InvalidKeyException e) {
+                e.printStackTrace();
+            } catch (NoSuchAlgorithmException e) {
+                e.printStackTrace();
+            } catch (IOException e) {
+                e.printStackTrace();
+            } catch (KeyStoreException e) {
+                e.printStackTrace();
+            } catch (UnrecoverableEntryException e) {
+                e.printStackTrace();
+            }
+            Uri path = Uri.parse(fileLink.getLinkedFilepath());
             Intent intent = new Intent(Intent.ACTION_VIEW);
             // TODO set type by suffix
             intent.setDataAndType(path, "*/*");
@@ -261,9 +279,12 @@ public class WithFragment extends Activity implements
                 startActivity(intent);
             }
             try {
-                fileLogic.encrypt();
-            } catch (FileNotFoundException e) {
+                fileLink.encrypt();
+            } catch (IOException e) {
                 Log.e(thisClass, "" + e);
+            } catch (NoSuchAlgorithmException | UnrecoverableEntryException | KeyStoreException | InvalidKeyException e) {
+                Log.e(thisClass, "" + e);
+                e.printStackTrace();
             }
         }
     }

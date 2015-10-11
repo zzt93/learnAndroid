@@ -1,16 +1,15 @@
 package com.example.zzt.tagdaily.logic;
 
 
+import android.util.Base64;
 import android.util.Log;
 
 import java.io.UnsupportedEncodingException;
 import java.security.InvalidAlgorithmParameterException;
 import java.security.InvalidKeyException;
-import java.security.KeyStore;
 import java.security.KeyStoreException;
 import java.security.NoSuchAlgorithmException;
 import java.security.UnrecoverableEntryException;
-import java.util.Arrays;
 
 import javax.crypto.BadPaddingException;
 import javax.crypto.Cipher;
@@ -29,38 +28,44 @@ public class Crypt {
 
 
     public static final String CRYPT_ALGO = "AES";
-    public static final String MODE_CRYPT = "CBC";
-    public static final String PADDING = "PKCS5Padding";
-    public static final String SPLITOR = "/";
+    public static final String MODE_PADDING = "/CBC/PKCS5Padding";
+
+    private final String thisClass = this.getClass().getCanonicalName();
+    /**
+     * the string as sign to store/get from KeyStore
+     */
     private final String alias;
 
+    private final int blockSize;
     private Cipher cipher;
-    // TODO add iv to output
-    private byte[] iv;
-    private String thisClass = this.getClass().getCanonicalName();
 
     public Crypt(String algo)
             throws NoSuchAlgorithmException, NoSuchPaddingException, KeyStoreException {
         KeyGenerator keygenerator = KeyGenerator.getInstance(algo);
-        // TODO: 10/7/15 change key in regular (2**48 blocks -- 128bits for AES)
-        SecretKey secretKey = keygenerator.generateKey();
-        alias = toString();
-        KeyStores.storeSecretKey(secretKey, alias);
-        cipher = Cipher.getInstance(algo + SPLITOR + MODE_CRYPT + SPLITOR + PADDING);
+        // for now this class is used to encrypt password, so may be no need
+        // to change one, so I make it only one for this class
+        alias = thisClass;
+        if (!KeyStores.hasAlias(alias)) {
+            SecretKey secretKey = keygenerator.generateKey();
+            KeyStores.storeSecretKey(secretKey, alias);
+        }
+        cipher = Cipher.getInstance(algo + MODE_PADDING);
+        blockSize = cipher.getBlockSize();
     }
 
 
-    public byte[] encrypt(String s) throws NoSuchAlgorithmException {
+    public String encrypt(String s) throws NoSuchAlgorithmException {
         try {
             byte[] text = s.getBytes(Default.ENCODING_UTF8);
 
             SecretKey secretKey = KeyStores.getSecretKey(alias);
             cipher.init(Cipher.ENCRYPT_MODE, secretKey);
-            iv = cipher.getIV();
+            byte[] iv = cipher.getIV();
             Log.d(thisClass, toHex(iv));
-            //            String s1 = new String(textEncrypted);
-//            System.out.println(s1);
-            return cipher.doFinal(text);
+            byte[] textEncrypted = cipher.doFinal(text);
+            String s1 = new String(textEncrypted, Default.ENCODING_UTF8);
+            System.out.println(s1);
+            return toBase64(iv) + toBase64(textEncrypted);
 
         } catch (BadPaddingException
                 | UnsupportedEncodingException
@@ -70,19 +75,21 @@ public class Crypt {
         } catch (UnrecoverableEntryException | KeyStoreException e) {
             e.printStackTrace();
         }
-        return new byte[]{};
+        return "";
     }
 
-    public byte[] decrypt(String s) throws NoSuchAlgorithmException {
+    public String decrypt(String s) throws NoSuchAlgorithmException {
         try {
-            byte[] text = s.getBytes(Default.ENCODING_UTF8);
+            byte[] iv = fromBase64(s.substring(0, blockSize));
+            byte[] encryptText = fromBase64(s.substring(blockSize));
 
             SecretKey secretKey = KeyStores.getSecretKey(alias);
             cipher.init(Cipher.DECRYPT_MODE, secretKey, new IvParameterSpec(iv));
 
-//            String str = new String(textDecrypted);
-//            System.out.println(str);
-            return cipher.doFinal(text);
+            byte[] textDecrypted = cipher.doFinal(encryptText);
+            String str = new String(textDecrypted, Default.ENCODING_UTF8);
+            System.out.println(str);
+            return str;
         } catch (BadPaddingException
                 | UnsupportedEncodingException
                 | IllegalBlockSizeException
@@ -92,17 +99,16 @@ public class Crypt {
         } catch (InvalidAlgorithmParameterException | KeyStoreException | UnrecoverableEntryException e) {
             e.printStackTrace();
         }
-        return new byte[]{};
+        return "";
     }
 
     public static void main(String[] args) {
         Crypt crypt;
         try {
             crypt = new Crypt(CRYPT_ALGO);
-            byte[] encrypt = crypt.encrypt("a message");
-            System.out.println(
-                    Arrays.toString(crypt.decrypt(new String(encrypt, Default.ENCODING_UTF8))));
-        } catch (NoSuchAlgorithmException | NoSuchPaddingException | UnsupportedEncodingException | KeyStoreException e) {
+            String encrypt = crypt.encrypt("a message");
+            System.out.println(crypt.decrypt(encrypt));
+        } catch (NoSuchAlgorithmException | NoSuchPaddingException | KeyStoreException e) {
             e.printStackTrace();
         }
     }
@@ -115,5 +121,14 @@ public class Crypt {
 
         return buff.toString();
     }
+
+    public static String toBase64(byte[] raw) {
+        return Base64.encodeToString(raw, Base64.NO_WRAP);
+    }
+
+    public static byte[] fromBase64(String base64) {
+        return Base64.decode(base64, Base64.NO_WRAP);
+    }
+
 
 }

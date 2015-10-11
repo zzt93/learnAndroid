@@ -2,10 +2,12 @@ package com.example.zzt.tagdaily.logic;
 
 import android.util.Log;
 
+import java.io.IOException;
 import java.security.KeyStore;
 import java.security.KeyStoreException;
 import java.security.NoSuchAlgorithmException;
 import java.security.UnrecoverableEntryException;
+import java.security.cert.CertificateException;
 
 import javax.crypto.SecretKey;
 
@@ -16,17 +18,23 @@ import javax.crypto.SecretKey;
  */
 public class KeyStores {
     private static String thisClass = "my keyStore";
+    private static KeyStore ks;
 
     static {
-
         try {
             ks = KeyStore.getInstance("AndroidKeyStore");
         } catch (KeyStoreException e) {
+            Log.e(thisClass, "no AndroidKeyStore");
+            e.printStackTrace();
+        }
+        try {
+            // TODO: 10/11/15 need to use this??? will AndroidKeyStore persist secret key???
+            ks.load(null);
+        } catch (IOException | NoSuchAlgorithmException | CertificateException e) {
             e.printStackTrace();
         }
     }
 
-    private static KeyStore ks;
 
     public static void storeSecretKey(SecretKey key, String alias) throws KeyStoreException {
         if (ks.containsAlias(alias)) {
@@ -44,7 +52,7 @@ public class KeyStores {
         }
         KeyStore.Entry entry = ks.getEntry(alias, null);
         if (!(entry instanceof KeyStore.SecretKeyEntry)) {
-            Log.e(thisClass, "Not an instance of a PrivateKeyEntry");
+            Log.e(thisClass, "Not an instance of a SecretKeyEntry");
             return null;
         }
         return ((KeyStore.SecretKeyEntry) entry).getSecretKey();
@@ -56,5 +64,9 @@ public class KeyStores {
             throw new RuntimeException("no such alias");
         }
         ks.deleteEntry(alias);
+    }
+
+    public static boolean hasAlias(String alias) throws KeyStoreException {
+        return ks.containsAlias(alias);
     }
 }

@@ -13,7 +13,6 @@ import android.widget.EditText;
 public class FirstActivity extends Activity {
 
     public static final String EXTRA_MESSAGE = "com.example.zzt.tagdaily.MESSAGE";
-    public static boolean debug = false;
     private static String thisClass = FirstActivity.class.getName();
 
     /**
@@ -48,13 +47,13 @@ public class FirstActivity extends Activity {
         // Handle presses on the action bar items
         switch (item.getItemId()) {
             case R.id.with_action_search:
-                if (debug) {
+                if (BuildConfig.DEBUG) {
                     Log.d(thisClass, "action search");
                 }
 //                openSearch();
                 return true;
             case R.id.with_action_add:
-                if (debug) {
+                if (BuildConfig.DEBUG) {
                     Log.d(thisClass, "action add");
                 }
 //                openSettings();
