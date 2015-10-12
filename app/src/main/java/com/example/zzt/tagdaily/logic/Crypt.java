@@ -45,6 +45,8 @@ public class Crypt {
         // for now this class is used to encrypt password, so may be no need
         // to change one, so I make it only one for this class
         alias = thisClass;
+        // TODO: 10/12/15 change it to derive from user password
+        //using a password-based key-derivation function such as PBKDF #2, Bcrypt or Scrypt. 
         if (!KeyStores.hasAlias(alias)) {
             SecretKey secretKey = keygenerator.generateKey();
             KeyStores.storeSecretKey(secretKey, alias);

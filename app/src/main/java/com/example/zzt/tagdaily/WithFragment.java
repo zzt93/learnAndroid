@@ -138,7 +138,7 @@ public class WithFragment extends Activity implements
             case R.id.with_action_add:
                 // show chooser to show file
                 Intent intent = new Intent(Intent.ACTION_GET_CONTENT);
-                // TODO show different app to add -- a global var to remember now category
+                // TODO show different app to add -- a global var to remember current category
                 prepareType(intent);
                 if (intentSafe(intent)) {
                     startActivityForResult(intent, PICK_FILE_REQUEST_CODE);

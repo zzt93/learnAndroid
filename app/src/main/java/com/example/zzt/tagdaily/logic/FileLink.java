@@ -69,9 +69,9 @@ public class FileLink {
             writeToFile(saveFile, linkedFilepath);
         }
         initNewPath(linkedFilepath);
-        // TODO: 10/7/15 change key in regular (2**48 blocks, 128bits/block for AES)
         // 10/11/15 using file path may cause the hacker reuse the same filename to
         // encrypt different file which will reuse the same private key and may be a problem
+        // TODO: 10/12/15 change it to password derived secret key
         alias = linkedFilepath;
         if (!KeyStores.hasAlias(alias)) {
             SecretKey secretKey = KeyGenerator.getInstance(Crypt.CRYPT_ALGO).generateKey();

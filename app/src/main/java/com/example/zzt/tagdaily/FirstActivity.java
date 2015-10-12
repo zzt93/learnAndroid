@@ -10,10 +10,20 @@ import android.view.MenuItem;
 import android.view.View;
 import android.widget.EditText;
 
+import com.example.zzt.tagdaily.logic.Crypt;
+import com.example.zzt.tagdaily.logic.KeyStores;
+
+import java.security.KeyStoreException;
+import java.security.NoSuchAlgorithmException;
+
+import javax.crypto.KeyGenerator;
+import javax.crypto.SecretKey;
+
 public class FirstActivity extends Activity {
 
     public static final String EXTRA_MESSAGE = "com.example.zzt.tagdaily.MESSAGE";
     private static String thisClass = FirstActivity.class.getName();
+    private String alias;
 
     /**
      * some fundamental setup for the activity,
@@ -32,6 +42,30 @@ public class FirstActivity extends Activity {
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_first);
+        if (BuildConfig.DEBUG) {
+            testKeyStore();
+        }
+    }
+
+    private void testKeyStore() {
+        KeyGenerator keygenerator;
+        try {
+            keygenerator = KeyGenerator.getInstance(Crypt.CRYPT_ALGO);
+        } catch (NoSuchAlgorithmException e) {
+            e.printStackTrace();
+            return;
+        }
+        // for now this class is used to encrypt password, so may be no need
+        // to change one, so I make it only one for this class
+        alias = thisClass;
+        try {
+            if (!KeyStores.hasAlias(alias)) {
+                SecretKey secretKey = keygenerator.generateKey();
+                KeyStores.storeSecretKey(secretKey, alias);
+            }
+        } catch (KeyStoreException e) {
+            e.printStackTrace();
+        }
     }
 
     @Override
