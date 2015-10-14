@@ -15,6 +15,9 @@ import javax.crypto.SecretKey;
  * Created by zzt on 10/11/15.
  * <p>
  * Usage: Store the private keys of encryption
+ *
+ * @deprecated For this can only store public/private key
+ * so it is useless for secretKey used by AES
  */
 public class KeyStores {
     private static String thisClass = "my keyStore";

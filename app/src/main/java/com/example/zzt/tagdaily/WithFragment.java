@@ -11,7 +11,9 @@ import android.view.Menu;
 import android.view.MenuItem;
 
 import com.example.zzt.tagdaily.logic.Category;
+import com.example.zzt.tagdaily.logic.Crypt;
 import com.example.zzt.tagdaily.logic.Default;
+import com.example.zzt.tagdaily.logic.DeriveKey;
 import com.example.zzt.tagdaily.logic.FileInfo;
 import com.example.zzt.tagdaily.logic.FileLink;
 import com.example.zzt.tagdaily.logic.UriUtility;
@@ -20,28 +22,36 @@ import java.io.File;
 import java.io.IOException;
 import java.security.InvalidAlgorithmParameterException;
 import java.security.InvalidKeyException;
-import java.security.KeyStoreException;
 import java.security.NoSuchAlgorithmException;
 import java.security.UnrecoverableEntryException;
 import java.util.ArrayList;
 import java.util.List;
+
+import javax.crypto.SecretKey;
 
 public class WithFragment extends Activity implements
         FolderFragment.FolderFragmentInteractionListener,
         DetailFileFragment.DetailFragmentInteractionListener {
 
     private static final int PICK_FILE_REQUEST_CODE = 1;
+    public static final int PS_DEFAULT_VALUE = 0;
     private static String thisClass = WithFragment.class.getCanonicalName();
     private FolderFragment folderFragment;
     private DetailFileFragment detailFragment;
     private ArrayList<FileInfo> fatherDirInfos = new ArrayList<>();
     private int fatherIndex = Default.DEFAULT_FOLDER_I;
     private ArrayList<FileInfo> childDirInfo = new ArrayList<>();
+    private SecretKey secretKey;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_with_fragment);
+
+        Intent intent = getIntent();
+        String password = intent.getStringExtra(FirstActivity.PASSWORD);
+        // set the secretKey for this fragment to encrypt/decrypt
+        secretKey = DeriveKey.deriveSecretKey(password);
 
         createAndInitDir(Category.values(), fatherDirInfos, childDirInfo);
         // Check that the activity is using the layout version with
@@ -56,7 +66,6 @@ public class WithFragment extends Activity implements
                 return;
             }
 
-            // Create a new Fragment to be placed in the activity layout
             folderFragment = FolderFragment.newInstance(
                     fatherDirInfos, R.layout.with_icon,
                     new String[]{FileInfo.LOGO, FileInfo.NAME},
@@ -177,8 +186,8 @@ public class WithFragment extends Activity implements
             String name = FileLink.getNameFromPath(path);
             FileLink file;
             try {
-                file = new FileLink(new File(currentSelectedDir(), name), path);
-            } catch (IOException | NoSuchAlgorithmException | KeyStoreException e) {
+                file = new FileLink(new File(currentSelectedDir(), name), path, secretKey);
+            } catch (IOException | NoSuchAlgorithmException e) {
                 Log.e(thisClass, "File write failed: " + e.toString());
                 return;
             }
@@ -186,7 +195,7 @@ public class WithFragment extends Activity implements
                 file.encrypt();
             } catch (IOException e) {
                 Log.e(thisClass, "File write failed: " + e.toString());
-            } catch (NoSuchAlgorithmException | UnrecoverableEntryException | KeyStoreException | InvalidKeyException e) {
+            } catch (NoSuchAlgorithmException | UnrecoverableEntryException | InvalidKeyException e) {
                 e.printStackTrace();
             }
             folderFragmentClick(fatherIndex);
@@ -250,7 +259,7 @@ public class WithFragment extends Activity implements
             // decrypt file and show it
             FileLink fileLink;
             try {
-                fileLink = new FileLink(fileInfo.toFile());
+                fileLink = new FileLink(fileInfo.toFile(), secretKey);
             } catch (IOException e) {
                 Log.e(thisClass, "can't read file" + e);
                 return;
@@ -265,12 +274,10 @@ public class WithFragment extends Activity implements
                 e.printStackTrace();
             } catch (IOException e) {
                 e.printStackTrace();
-            } catch (KeyStoreException e) {
-                e.printStackTrace();
             } catch (UnrecoverableEntryException e) {
                 e.printStackTrace();
             }
-            Uri path = Uri.parse(fileLink.getLinkedFilepath());
+            Uri path = Uri.parse(fileLink.getLinkedFilePath());
             Intent intent = new Intent(Intent.ACTION_VIEW);
             // TODO set type by suffix
             intent.setDataAndType(path, "*/*");
@@ -282,7 +289,7 @@ public class WithFragment extends Activity implements
                 fileLink.encrypt();
             } catch (IOException e) {
                 Log.e(thisClass, "" + e);
-            } catch (NoSuchAlgorithmException | UnrecoverableEntryException | KeyStoreException | InvalidKeyException e) {
+            } catch (NoSuchAlgorithmException | UnrecoverableEntryException | InvalidKeyException e) {
                 Log.e(thisClass, "" + e);
                 e.printStackTrace();
             }

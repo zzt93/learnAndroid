@@ -22,6 +22,7 @@ import javax.crypto.SecretKey;
 public class FirstActivity extends Activity {
 
     public static final String EXTRA_MESSAGE = "com.example.zzt.tagdaily.MESSAGE";
+    public static final String PASSWORD = "password";
     private static String thisClass = FirstActivity.class.getName();
     private String alias;
 
@@ -118,6 +119,7 @@ public class FirstActivity extends Activity {
 
     public void showFragment(View view) {
         Intent intent = new Intent(this, WithFragment.class);
+        intent.putExtra(PASSWORD, "asdf" + "19950809");
         startActivity(intent);
     }
 }
