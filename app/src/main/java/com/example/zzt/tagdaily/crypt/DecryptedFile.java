@@ -1,4 +1,4 @@
-package com.example.zzt.tagdaily.logic;
+package com.example.zzt.tagdaily.crypt;
 
 import java.io.IOException;
 

@@ -1,8 +1,9 @@
-package com.example.zzt.tagdaily.logic;
+package com.example.zzt.tagdaily.crypt;
 
 import android.util.Log;
 
 import com.example.zzt.tagdaily.BuildConfig;
+import com.example.zzt.tagdaily.logic.Default;
 
 import java.io.BufferedInputStream;
 import java.io.BufferedReader;
@@ -39,33 +40,33 @@ import javax.crypto.spec.IvParameterSpec;
 public class FileLink {
 
     public static final double MAX_FILE_SIZE = Math.pow(2, 20);
-    private String thisClass = this.getClass().getCanonicalName();
-    /**
-     * The file work as link, i.e. to save information
-     */
-    private File saveFile;
+    private static String thisClass = FileLink.class.getCanonicalName();
     /**
      * Target file information
      */
     private String linkedFilePath;
     private String encryptedFilePath;
-    private SecretKey secretKey;
+    private String password;
 
     /**
      * To reuse an added fileLink, can't change linkedFilePath
-     * @param saveFile
+     * which is always means to decrypt the file
+     *
+     * @param saveFile the file to save target file information
+     *                 which work as symbolic link
+     * @param password Encryption base password
      * @throws IOException
      */
-    public FileLink(File saveFile, SecretKey secretKey) throws IOException {
+    public FileLink(File saveFile, String password) throws IOException {
         if (!saveFile.exists()) {
             throw new RuntimeException("Invalid FileLink");
         }
         initPath(saveFile);
         initNewPath(linkedFilePath);
+        this.password = password;
     }
 
-    public FileLink(File saveFile, String linkedFilePath, SecretKey secretKey) throws IOException, NoSuchAlgorithmException {
-        this.saveFile = saveFile;
+    public FileLink(File saveFile, String linkedFilePath, String password) throws IOException, NoSuchAlgorithmException {
         /**
          * when will file already exist:
          *  1. re-add a already added file
@@ -78,8 +79,7 @@ public class FileLink {
             writeToFile(saveFile, linkedFilePath);
         }
         initNewPath(linkedFilePath);
-        // 10/11/15 using file path may cause the hacker reuse the same filename to
-        // encrypt different file which will reuse the same private key and may be a problem
+        this.password = password;
     }
 
     private void initNewPath(String path) {
@@ -96,7 +96,6 @@ public class FileLink {
     }
 
     private void initPath(File file) throws IOException {
-        this.saveFile = file;
         BufferedReader br = new BufferedReader(new FileReader(file));
         linkedFilePath = br.readLine();
         br.close();
@@ -133,7 +132,7 @@ public class FileLink {
      * @throws InvalidKeyException
      * @throws NoSuchAlgorithmException
      */
-    public void encrypt()
+    public boolean encrypt()
             throws IOException, UnrecoverableEntryException, InvalidKeyException, NoSuchAlgorithmException {
         // prepare cipher
         Cipher aes;
@@ -141,17 +140,21 @@ public class FileLink {
             aes = Cipher.getInstance(Crypt.CRYPT_ALGO + Crypt.MODE_PADDING);
         } catch (NoSuchAlgorithmException | NoSuchPaddingException e) {
             Log.e(thisClass, "wrong Cipher argument" + e);
-            return;
+            return false;
         }
-        aes.init(Cipher.ENCRYPT_MODE, getSecretKey());
+        CryptInfo cryptInfo = DeriveKey.deriveSecretKey(getPassword());
+        SecretKey secretKey = cryptInfo.getSecretKey();
+        aes.init(Cipher.ENCRYPT_MODE, secretKey);
         byte[] iv = aes.getIV();
 
         // write to an encrypted file
         FileOutputStream outputStream = new FileOutputStream(encryptedFilePath);
         CipherOutputStream cipherOutputStream
                 = new CipherOutputStream(outputStream, aes);
-        // save iv in order to decrypt it
+        // save iv/salt in order to decrypt it
         cipherOutputStream.write(iv);
+        cipherOutputStream.write(cryptInfo.getSalt());
+
         BufferedInputStream bufferedInputStream
                 = new BufferedInputStream(new FileInputStream(linkedFilePath));
         int read = bufferedInputStream.read();
@@ -161,7 +164,9 @@ public class FileLink {
         }
         // delete original file
         // TODO: 10/11/15 consider a dir
-//        boolean delete = saveFile.delete();
+//        boolean delete = new File(linkedFilePath).delete();
+//        return delete;
+        return true;
     }
 
     /**
@@ -196,7 +201,8 @@ public class FileLink {
      * @throws InvalidKeyException
      * @throws NoSuchAlgorithmException
      */
-    public DecryptedFile decryptPart() throws IOException, UnrecoverableEntryException, InvalidAlgorithmParameterException, InvalidKeyException, NoSuchAlgorithmException {
+    public DecryptedFile decryptPart()
+            throws IOException, UnrecoverableEntryException, InvalidAlgorithmParameterException, InvalidKeyException, NoSuchAlgorithmException {
         Cipher cipher;
         try {
             cipher = Cipher.getInstance(Crypt.CRYPT_ALGO + Crypt.MODE_PADDING);
@@ -209,12 +215,14 @@ public class FileLink {
         BufferedInputStream bufferedInputStream
                 = new BufferedInputStream(new FileInputStream(encryptedFilePath));
         byte[] iv = new byte[cipher.getBlockSize()];
+        byte[] salt = new byte[cipher.getBlockSize()];
         int read = bufferedInputStream.read(iv);
         if (BuildConfig.DEBUG && read != cipher.getBlockSize()) {
             throw new AssertionError("can't read iv from file");
         }
+        SecretKey secretKey = DeriveKey.recoverSecretKey(password, salt);
         // init cipher with key and iv
-        cipher.init(Cipher.DECRYPT_MODE, getSecretKey(), new IvParameterSpec(iv));
+        cipher.init(Cipher.DECRYPT_MODE, secretKey, new IvParameterSpec(iv));
         // TODO: 10/11/15 test whether read iv make it not decrypt iv
         CipherInputStream cipherInputStream = new CipherInputStream(bufferedInputStream, cipher);
         return new DecryptedFile(cipherInputStream);
@@ -224,7 +232,7 @@ public class FileLink {
         return linkedFilePath;
     }
 
-    public SecretKey getSecretKey() {
-        return secretKey;
+    public String getPassword() {
+        return password;
     }
 }

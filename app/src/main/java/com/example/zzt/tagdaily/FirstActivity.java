@@ -10,7 +10,7 @@ import android.view.MenuItem;
 import android.view.View;
 import android.widget.EditText;
 
-import com.example.zzt.tagdaily.logic.Crypt;
+import com.example.zzt.tagdaily.crypt.Crypt;
 import com.example.zzt.tagdaily.logic.KeyStores;
 
 import java.security.KeyStoreException;
@@ -119,6 +119,7 @@ public class FirstActivity extends Activity {
 
     public void showFragment(View view) {
         Intent intent = new Intent(this, WithFragment.class);
+        // TODO: 10/15/15 change to real password
         intent.putExtra(PASSWORD, "asdf" + "19950809");
         startActivity(intent);
     }

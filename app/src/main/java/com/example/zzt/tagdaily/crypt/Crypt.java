@@ -1,10 +1,11 @@
-package com.example.zzt.tagdaily.logic;
+package com.example.zzt.tagdaily.crypt;
 
 
 import android.util.Base64;
 import android.util.Log;
 
 import com.example.zzt.tagdaily.BuildConfig;
+import com.example.zzt.tagdaily.logic.Default;
 
 import java.io.UnsupportedEncodingException;
 import java.security.InvalidAlgorithmParameterException;
@@ -44,25 +45,22 @@ public class Crypt {
 
     public static final int KEY_BYTES = BLOCK_SIZE;
     public static final int KEY_BITS = BLOCK_SIZE * 8;
+    private final String algo;
+    private final String password;
 
 
-
-
-    private Cipher cipher;
-    private SecretKey secretKey;
-
-    public Crypt(SecretKey secretKey)
+    public Crypt(String password)
             throws NoSuchPaddingException, NoSuchAlgorithmException, KeyStoreException {
-        this(Crypt.CRYPT_ALGO, secretKey);
+        this(Crypt.CRYPT_ALGO, password);
     }
 
-    private Crypt(String algo, SecretKey secretKey)
-            throws NoSuchAlgorithmException, NoSuchPaddingException, KeyStoreException {
-        this.secretKey = secretKey;
-        // for now this class is used to encrypt password, so may be no need
-        // to change one, so I make it only one for this class
-        //using a password-based key-derivation function such as PBKDF #2, Bcrypt or Scrypt.
-        cipher = Cipher.getInstance(algo + MODE_PADDING);
+    /**
+     * @param algo valid algorithm(only block cipher algorithm is valid):
+     *             AES, DES, 3DES
+     */
+    private Crypt(String algo, String password) {
+        this.algo = algo;
+        this.password = password;
     }
 
 
@@ -70,22 +68,30 @@ public class Crypt {
         try {
             byte[] text = s.getBytes(Default.ENCODING_UTF8);
 
+            Cipher cipher = Cipher.getInstance(algo + MODE_PADDING);
+            CryptInfo cryptInfo = DeriveKey.deriveSecretKey(password);
+            SecretKey secretKey = cryptInfo.getSecretKey();
             cipher.init(Cipher.ENCRYPT_MODE, secretKey);
             byte[] iv = cipher.getIV();
-            Log.d(thisClass, toHex(iv));
-            if (BuildConfig.DEBUG && iv.length != BLOCK_SIZE) {
-                throw new RuntimeException("iv.length != blockSize");
+            if (BuildConfig.DEBUG) {
+                Log.d(thisClass, toHex(iv));
+                if (iv.length != BLOCK_SIZE) {
+                    throw new RuntimeException("iv.length != blockSize");
+                }
             }
             byte[] textEncrypted = cipher.doFinal(text);
             String s1 = new String(textEncrypted, Default.ENCODING_UTF8);
             System.out.println(s1);
-            return toBase64(iv) + CHAR_NOT_BASE64 + toBase64(textEncrypted);
+            return toBase64(cryptInfo.getSalt()) + CHAR_NOT_BASE64 +
+                    toBase64(iv) + CHAR_NOT_BASE64 + toBase64(textEncrypted);
 
         } catch (BadPaddingException
                 | UnsupportedEncodingException
                 | IllegalBlockSizeException
                 | InvalidKeyException e) {
             Log.e(thisClass, "error: " + e);
+        } catch (NoSuchPaddingException e) {
+            e.printStackTrace();
         }
         return "";
     }
@@ -93,14 +99,22 @@ public class Crypt {
     public String decrypt(String s) throws NoSuchAlgorithmException {
         try {
             String[] split = s.split(CHAR_NOT_BASE64);
+            if (BuildConfig.DEBUG && split.length != 3) {
+                throw new IllegalArgumentException("decrypt string is broken");
+            }
             byte[] iv = fromBase64(split[0]);
-            byte[] encryptText = fromBase64(s.substring(BLOCK_SIZE));
+            byte[] salt = fromBase64(split[1]);
+            byte[] encryptText = fromBase64(split[2]);
 
+            Cipher cipher = Cipher.getInstance(algo + MODE_PADDING);
+            SecretKey secretKey = DeriveKey.recoverSecretKey(password, salt);
             cipher.init(Cipher.DECRYPT_MODE, secretKey, new IvParameterSpec(iv));
 
             byte[] textDecrypted = cipher.doFinal(encryptText);
             String str = new String(textDecrypted, Default.ENCODING_UTF8);
-            System.out.println(str);
+            if (BuildConfig.DEBUG) {
+                System.out.println(str);
+            }
             return str;
         } catch (BadPaddingException
                 | UnsupportedEncodingException
@@ -108,7 +122,7 @@ public class Crypt {
                 | InvalidKeyException e) {
             e.printStackTrace();
             Log.e(thisClass, "error: " + e);
-        } catch (InvalidAlgorithmParameterException e) {
+        } catch (InvalidAlgorithmParameterException | NoSuchPaddingException e) {
             e.printStackTrace();
         }
         return "";
@@ -117,7 +131,7 @@ public class Crypt {
     public static void main(String[] args) {
         Crypt crypt;
         try {
-            crypt = new Crypt(DeriveKey.deriveSecretKey("1234567890"));
+            crypt = new Crypt("1234567890");
             String encrypt = crypt.encrypt("a message");
             System.out.println(crypt.decrypt(encrypt));
         } catch (NoSuchAlgorithmException | NoSuchPaddingException | KeyStoreException e) {

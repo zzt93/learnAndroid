@@ -11,11 +11,9 @@ import android.view.Menu;
 import android.view.MenuItem;
 
 import com.example.zzt.tagdaily.logic.Category;
-import com.example.zzt.tagdaily.logic.Crypt;
 import com.example.zzt.tagdaily.logic.Default;
-import com.example.zzt.tagdaily.logic.DeriveKey;
 import com.example.zzt.tagdaily.logic.FileInfo;
-import com.example.zzt.tagdaily.logic.FileLink;
+import com.example.zzt.tagdaily.crypt.FileLink;
 import com.example.zzt.tagdaily.logic.UriUtility;
 
 import java.io.File;
@@ -27,21 +25,19 @@ import java.security.UnrecoverableEntryException;
 import java.util.ArrayList;
 import java.util.List;
 
-import javax.crypto.SecretKey;
 
 public class WithFragment extends Activity implements
         FolderFragment.FolderFragmentInteractionListener,
         DetailFileFragment.DetailFragmentInteractionListener {
 
     private static final int PICK_FILE_REQUEST_CODE = 1;
-    public static final int PS_DEFAULT_VALUE = 0;
     private static String thisClass = WithFragment.class.getCanonicalName();
     private FolderFragment folderFragment;
     private DetailFileFragment detailFragment;
     private ArrayList<FileInfo> fatherDirInfos = new ArrayList<>();
     private int fatherIndex = Default.DEFAULT_FOLDER_I;
     private ArrayList<FileInfo> childDirInfo = new ArrayList<>();
-    private SecretKey secretKey;
+    private String password;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -49,9 +45,8 @@ public class WithFragment extends Activity implements
         setContentView(R.layout.activity_with_fragment);
 
         Intent intent = getIntent();
-        String password = intent.getStringExtra(FirstActivity.PASSWORD);
+        password = intent.getStringExtra(FirstActivity.PASSWORD);
         // set the secretKey for this fragment to encrypt/decrypt
-        secretKey = DeriveKey.deriveSecretKey(password);
 
         createAndInitDir(Category.values(), fatherDirInfos, childDirInfo);
         // Check that the activity is using the layout version with
@@ -186,7 +181,7 @@ public class WithFragment extends Activity implements
             String name = FileLink.getNameFromPath(path);
             FileLink file;
             try {
-                file = new FileLink(new File(currentSelectedDir(), name), path, secretKey);
+                file = new FileLink(new File(currentSelectedDir(), name), path, password);
             } catch (IOException | NoSuchAlgorithmException e) {
                 Log.e(thisClass, "File write failed: " + e.toString());
                 return;
@@ -259,7 +254,7 @@ public class WithFragment extends Activity implements
             // decrypt file and show it
             FileLink fileLink;
             try {
-                fileLink = new FileLink(fileInfo.toFile(), secretKey);
+                fileLink = new FileLink(fileInfo.toFile(), password);
             } catch (IOException e) {
                 Log.e(thisClass, "can't read file" + e);
                 return;
