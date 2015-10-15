@@ -96,7 +96,7 @@ public class DeriveKey {
             e.printStackTrace();
             throw new RuntimeException("wrong key", e);
         }
-        return Crypt.toBase64(hash);
+        return Crypt.toBase64(salt) + Crypt.CHAR_NOT_BASE64 +   Crypt.toBase64(hash);
     }
 
     public static void main(String[] args) {

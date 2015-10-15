@@ -82,6 +82,8 @@ public class Crypt {
             byte[] textEncrypted = cipher.doFinal(text);
             String s1 = new String(textEncrypted, Default.ENCODING_UTF8);
             System.out.println(s1);
+            // can't use new String(bytes, encoding) for no encoding those bytes
+            // will be explained correctly
             return toBase64(cryptInfo.getSalt()) + CHAR_NOT_BASE64 +
                     toBase64(iv) + CHAR_NOT_BASE64 + toBase64(textEncrypted);
 
