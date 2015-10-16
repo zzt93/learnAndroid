@@ -34,13 +34,18 @@ public class DeriveKey {
      * @return SecretKey of cryptAlgo
      */
     public static CryptInfo deriveSecretKey(String password, int keyLen, String cryptAlgo) {
-        byte[] salt = getSalt(keyLen);
+        byte[] salt = getRandomByte(keyLen);
         SecretKey secretKey = initSecretKey(password, keyLen, cryptAlgo, salt);
         return new CryptInfo(salt, secretKey);
     }
 
-    public static byte[] getSalt(int keyLen) {
-        int saltLength = keyLen / 8; // same size as key output
+    /**
+     * Used to produce salt/iv for crypto
+     * @param keyBits key length in bits
+     * @return salt/iv
+     */
+    public static byte[] getRandomByte(int keyBits) {
+        int saltLength = keyBits / 8; // same size as key output
         SecureRandom random = new SecureRandom();
         byte[] salt = new byte[saltLength];
         random.nextBytes(salt);
@@ -76,7 +81,7 @@ public class DeriveKey {
     public static String hashPassword(String password) {
         // generate random salt
         // use salt size at least as long as hash
-        byte salt[] = DeriveKey.getSalt(Crypt.KEY_BITS);
+        byte salt[] = DeriveKey.getRandomByte(Crypt.KEY_BITS);
 
         // generate Hash
         PBEKeySpec spec = new PBEKeySpec(password.toCharArray(), salt, PASSWORD_ITERATIONS, PASSWORD_BITS);
@@ -101,6 +106,6 @@ public class DeriveKey {
 
     public static void main(String[] args) {
         // @tested salt is different every time invoke it
-        getSalt(Crypt.KEY_BITS);
+        getRandomByte(Crypt.KEY_BITS);
     }
 }

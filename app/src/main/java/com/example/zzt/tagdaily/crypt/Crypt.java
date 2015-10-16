@@ -63,16 +63,46 @@ public class Crypt {
         this.password = password;
     }
 
+    /**
+     * Tested:
+     * - Base64 usage
+     * - salt/iv is random every time
+     * - recover key is right
+     */
+    public static void testCrypt() {
+        Crypt crypt;
+        try {
+            crypt = new Crypt("asdf");
+        } catch (NoSuchPaddingException | NoSuchAlgorithmException | KeyStoreException e) {
+            e.printStackTrace();
+            return;
+        }
+        String s = "";
+        String to_encrypt = "I am a student";
+        try {
+            s = crypt.encrypt(to_encrypt);
+        } catch (NoSuchAlgorithmException e) {
+            e.printStackTrace();
+        }
+        try {
+            if (!to_encrypt.equals(crypt.decrypt(s))) {
+                throw new RuntimeException("test wrong");
+            }
+        } catch (NoSuchAlgorithmException e) {
+            e.printStackTrace();
+        }
+    }
+
 
     public String encrypt(String s) throws NoSuchAlgorithmException {
         try {
             byte[] text = s.getBytes(Default.ENCODING_UTF8);
+            byte[] iv = DeriveKey.getRandomByte(KEY_BITS);
 
             Cipher cipher = Cipher.getInstance(algo + MODE_PADDING);
             CryptInfo cryptInfo = DeriveKey.deriveSecretKey(password);
             SecretKey secretKey = cryptInfo.getSecretKey();
-            cipher.init(Cipher.ENCRYPT_MODE, secretKey);
-            byte[] iv = cipher.getIV();
+            cipher.init(Cipher.ENCRYPT_MODE, secretKey, new IvParameterSpec(iv));
             if (BuildConfig.DEBUG) {
                 Log.d(thisClass, toHex(iv));
                 if (iv.length != BLOCK_SIZE) {
@@ -92,7 +122,7 @@ public class Crypt {
                 | IllegalBlockSizeException
                 | InvalidKeyException e) {
             Log.e(thisClass, "error: " + e);
-        } catch (NoSuchPaddingException e) {
+        } catch (NoSuchPaddingException | InvalidAlgorithmParameterException e) {
             e.printStackTrace();
         }
         return "";
@@ -104,8 +134,8 @@ public class Crypt {
             if (BuildConfig.DEBUG && split.length != 3) {
                 throw new IllegalArgumentException("decrypt string is broken");
             }
-            byte[] iv = fromBase64(split[0]);
-            byte[] salt = fromBase64(split[1]);
+            byte[] salt = fromBase64(split[0]);
+            byte[] iv = fromBase64(split[1]);
             byte[] encryptText = fromBase64(split[2]);
 
             Cipher cipher = Cipher.getInstance(algo + MODE_PADDING);

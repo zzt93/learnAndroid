@@ -32,12 +32,12 @@ public class FirstActivity extends Activity {
      * defining member variables, and configuring some of the UI.
      *
      * @param savedInstanceState -- the saved system state
-     *
-     * 1. In order for the Android system to restore the
-     * state of the views in your activity,
-     * each view must have a unique ID,
-     * supplied by the android:id attribute.
-     * 2. activity will be destroyed and recreated each time the user rotates the screen
+     *                           <p/>
+     *                           1. In order for the Android system to restore the
+     *                           state of the views in your activity,
+     *                           each view must have a unique ID,
+     *                           supplied by the android:id attribute.
+     *                           2. activity will be destroyed and recreated each time the user rotates the screen
      */
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -45,6 +45,7 @@ public class FirstActivity extends Activity {
         setContentView(R.layout.activity_first);
         if (BuildConfig.DEBUG) {
             testKeyStore();
+            Crypt.testCrypt();
         }
     }
 

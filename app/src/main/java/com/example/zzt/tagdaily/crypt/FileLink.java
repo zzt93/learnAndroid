@@ -136,6 +136,7 @@ public class FileLink {
             throws IOException, UnrecoverableEntryException, InvalidKeyException, NoSuchAlgorithmException {
         // prepare cipher
         Cipher aes;
+        byte[] iv = DeriveKey.getRandomByte(Crypt.KEY_BITS);
         try {
             aes = Cipher.getInstance(Crypt.CRYPT_ALGO + Crypt.MODE_PADDING);
         } catch (NoSuchAlgorithmException | NoSuchPaddingException e) {
@@ -144,8 +145,12 @@ public class FileLink {
         }
         CryptInfo cryptInfo = DeriveKey.deriveSecretKey(getPassword());
         SecretKey secretKey = cryptInfo.getSecretKey();
-        aes.init(Cipher.ENCRYPT_MODE, secretKey);
-        byte[] iv = aes.getIV();
+        try {
+            aes.init(Cipher.ENCRYPT_MODE, secretKey,
+                    new IvParameterSpec(iv));
+        } catch (InvalidAlgorithmParameterException e) {
+            e.printStackTrace();
+        }
 
         // write to an encrypted file
         FileOutputStream outputStream = new FileOutputStream(encryptedFilePath);
