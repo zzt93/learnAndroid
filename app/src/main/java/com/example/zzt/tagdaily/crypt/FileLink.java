@@ -6,6 +6,7 @@ import com.example.zzt.tagdaily.BuildConfig;
 import com.example.zzt.tagdaily.logic.Default;
 
 import java.io.BufferedInputStream;
+import java.io.BufferedOutputStream;
 import java.io.BufferedReader;
 import java.io.File;
 import java.io.FileInputStream;
@@ -27,19 +28,19 @@ import javax.crypto.spec.IvParameterSpec;
 
 /**
  * Created by zzt on 10/6/15.
- * <p>
+ * <p/>
  * Usage:
- * <p>
+ * <p/>
  * an abstraction to imitate a symbolic link to a file <br/>
  * for Android method to do it demanding a very high api level<br/>
- * <p>
+ * <p/>
  * this object contains the information(now is path) of a target file
  * it can be used to encrypt/decrypt target file for it has the information
  * of target file
  */
 public class FileLink {
 
-    public static final double MAX_FILE_SIZE = Math.pow(2, 20);
+    public static final double MAX_FILE_SIZE = Math.pow(2, 24);
     private static String thisClass = FileLink.class.getCanonicalName();
     /**
      * Target file information
@@ -67,14 +68,14 @@ public class FileLink {
     }
 
     public FileLink(File saveFile, String linkedFilePath, String password) throws IOException, NoSuchAlgorithmException {
-        /**
-         * when will file already exist:
-         *  1. re-add a already added file
-         *  2. reuse a added file
-         */
         if (saveFile.exists()) {
             initPath(saveFile);
         } else {
+            /**
+             * when will file already exist:
+             *  1. re-add a already added file
+             *  2. reuse a added file
+             */
             this.linkedFilePath = linkedFilePath;
             writeToFile(saveFile, linkedFilePath);
         }
@@ -85,7 +86,7 @@ public class FileLink {
     private void initNewPath(String path) {
         // TODO: 10/11/15 consider a dir
         String[] dirNameFromPath = getDirNameFromPath(path);
-        encryptedFilePath = dirNameFromPath[0] + Default.DEFAULT_PREFIX + dirNameFromPath[1];
+        encryptedFilePath = dirNameFromPath[0] + File.separator + Default.DEFAULT_PREFIX + dirNameFromPath[1];
     }
 
     public void writeToFile(File file, String content) throws IOException {
@@ -123,9 +124,8 @@ public class FileLink {
 
     /**
      * This function will
-     * 1. encrypt all contents of the file from scratch
-     * and
-     * 2. delete the original file
+     * 1. encrypt all contents of the file from scratch -- TODO may too slow
+     * 2. produce a encrypted version of original file in original folder
      *
      * @throws IOException
      * @throws UnrecoverableEntryException
@@ -135,10 +135,10 @@ public class FileLink {
     public boolean encrypt()
             throws IOException, UnrecoverableEntryException, InvalidKeyException, NoSuchAlgorithmException {
         // prepare cipher
-        Cipher aes;
+        Cipher cipher;
         byte[] iv = DeriveKey.getRandomByte(Crypt.KEY_BITS);
         try {
-            aes = Cipher.getInstance(Crypt.CRYPT_ALGO + Crypt.MODE_PADDING);
+            cipher = Cipher.getInstance(Crypt.CRYPT_ALGO + Crypt.MODE_PADDING);
         } catch (NoSuchAlgorithmException | NoSuchPaddingException e) {
             Log.e(thisClass, "wrong Cipher argument" + e);
             return false;
@@ -146,7 +146,7 @@ public class FileLink {
         CryptInfo cryptInfo = DeriveKey.deriveSecretKey(getPassword());
         SecretKey secretKey = cryptInfo.getSecretKey();
         try {
-            aes.init(Cipher.ENCRYPT_MODE, secretKey,
+            cipher.init(Cipher.ENCRYPT_MODE, secretKey,
                     new IvParameterSpec(iv));
         } catch (InvalidAlgorithmParameterException e) {
             e.printStackTrace();
@@ -155,28 +155,30 @@ public class FileLink {
         // write to an encrypted file
         FileOutputStream outputStream = new FileOutputStream(encryptedFilePath);
         CipherOutputStream cipherOutputStream
-                = new CipherOutputStream(outputStream, aes);
-        // save iv/salt in order to decrypt it
-        cipherOutputStream.write(iv);
-        cipherOutputStream.write(cryptInfo.getSalt());
+                = new CipherOutputStream(outputStream, cipher);
+        // save iv/salt in plain text in order to decrypt it
+        outputStream.write(iv);
+        outputStream.write(cryptInfo.getSalt());
 
         BufferedInputStream bufferedInputStream
                 = new BufferedInputStream(new FileInputStream(linkedFilePath));
-        int read = bufferedInputStream.read();
-        while (read != -1) {
+        int read;
+        while ((read = bufferedInputStream.read()) != -1) {
             cipherOutputStream.write(read);
-            read = bufferedInputStream.read();
         }
+
+        return true;
+    }
+
+    public boolean deleteOriginal() {
         // delete original file
         // TODO: 10/11/15 consider a dir
-//        boolean delete = new File(linkedFilePath).delete();
-//        return delete;
-        return true;
+        return new File(linkedFilePath).delete();
     }
 
     /**
      * Decrypt all of the content of file under original folder
-
+     *
      * @return The decrypted byte array
      * @throws InvalidAlgorithmParameterException
      * @throws InvalidKeyException
@@ -184,17 +186,19 @@ public class FileLink {
      * @throws IOException
      * @throws UnrecoverableEntryException
      */
-    public byte[] decryptAll() throws InvalidAlgorithmParameterException, InvalidKeyException, NoSuchAlgorithmException, IOException, UnrecoverableEntryException {
+    public void decryptAll() throws InvalidAlgorithmParameterException, InvalidKeyException, NoSuchAlgorithmException, IOException, UnrecoverableEntryException {
         DecryptedFile decryptedFile = decryptPart();
-        File file = new File(linkedFilePath);
+        File file = new File(encryptedFilePath);
         long length = file.length();
         if (length > MAX_FILE_SIZE) {
             throw new RuntimeException("using wrong method to decrypt file");
         }
-        int size = ((int) length);
-        byte res[] = new byte[size];
-        decryptedFile.read(res);
-        return res;
+        BufferedOutputStream bufferedOutputStream =
+                new BufferedOutputStream(new FileOutputStream(new File(linkedFilePath)));
+        int read;
+        while ((read = decryptedFile.read()) != -1) {
+            bufferedOutputStream.write(read);
+        }
     }
 
     /**
@@ -222,7 +226,9 @@ public class FileLink {
         byte[] iv = new byte[cipher.getBlockSize()];
         byte[] salt = new byte[cipher.getBlockSize()];
         int read = bufferedInputStream.read(iv);
-        if (BuildConfig.DEBUG && read != cipher.getBlockSize()) {
+        int readS = bufferedInputStream.read(salt);
+        if (BuildConfig.DEBUG && read != cipher.getBlockSize()
+                &&readS != cipher.getBlockSize()) {
             throw new AssertionError("can't read iv from file");
         }
         SecretKey secretKey = DeriveKey.recoverSecretKey(password, salt);
@@ -239,5 +245,9 @@ public class FileLink {
 
     public String getPassword() {
         return password;
+    }
+
+    public boolean largeLinkedSize() {
+        return new File(encryptedFilePath).length() > MAX_FILE_SIZE;
     }
 }

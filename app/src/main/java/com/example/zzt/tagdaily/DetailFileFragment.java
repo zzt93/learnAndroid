@@ -12,7 +12,7 @@ import android.widget.SimpleAdapter;
 import android.widget.TextView;
 
 
-import com.example.zzt.tagdaily.logic.FileInfo;
+import com.example.zzt.tagdaily.logic.UIFileInfo;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -42,19 +42,19 @@ public class DetailFileFragment extends Fragment implements AdapterView.OnItemCl
      * Use this factory method to create a new instance of
      * this fragment using the provided parameters.
      *
-     * @param fileInfos Parameter 1.
+     * @param UIFileInfos Parameter 1.
      * @param param2 Parameter 2.
      * @return A new instance of fragment DetailFileFragment.
      */
-    public static DetailFileFragment newInstance(ArrayList<FileInfo> fileInfos, String param2) {
+    public static DetailFileFragment newInstance(ArrayList<UIFileInfo> UIFileInfos, String param2) {
         DetailFileFragment fragment = new DetailFileFragment();
         Bundle args = new Bundle();
 //        args.putString(ARG_PARAM1, param1);
 //        args.putString(ARG_PARAM2, param2);
         fragment.setArguments(args);
 
-        for (FileInfo fileInfo : fileInfos) {
-            fragment.fileList.add(fileInfo.convertFileMap());
+        for (UIFileInfo UIFileInfo : UIFileInfos) {
+            fragment.fileList.add(UIFileInfo.convertFileMap());
         }
         return fragment;
     }
@@ -74,7 +74,7 @@ public class DetailFileFragment extends Fragment implements AdapterView.OnItemCl
         mAdapter = new SimpleAdapter(getActivity(),
                 fileList,
                 R.layout.file_info,
-                new String[]{FileInfo.NAME, FileInfo.LAST_MODIFIED},
+                new String[]{UIFileInfo.NAME, UIFileInfo.LAST_MODIFIED},
                 new int[]{R.id.file_title, R.id.file_info});
     }
 
@@ -143,9 +143,9 @@ public class DetailFileFragment extends Fragment implements AdapterView.OnItemCl
         return mAdapter;
     }
 
-    public SimpleAdapter addListView(ArrayList<FileInfo> fileList) {
-        for (FileInfo fileInfo : fileList) {
-            this.fileList.add(fileInfo.convertFileMap());
+    public SimpleAdapter addListView(ArrayList<UIFileInfo> fileList) {
+        for (UIFileInfo UIFileInfo : fileList) {
+            this.fileList.add(UIFileInfo.convertFileMap());
         }
         return mAdapter;
     }

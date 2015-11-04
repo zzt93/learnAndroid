@@ -10,8 +10,9 @@ import java.util.HashMap;
  * Created by zzt on 10/2/15.
  * <p>
  * Usage:
+ * the class store the file information for ui
  */
-public class FileInfo {
+public class UIFileInfo {
     public static final String NAME = "name";
     public static final String LOGO = "logo";
     public static final String LAST_MODIFIED = "lastModify";
@@ -20,7 +21,7 @@ public class FileInfo {
     private File file;
     private int id;
 
-    public FileInfo(File file, int id) {
+    public UIFileInfo(File file, int id) {
         this.file = file;
         this.id = id;
     }

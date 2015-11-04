@@ -31,8 +31,8 @@ public enum Category {
     public static HashMap<String, String> makeMap(int i) {
         Category category = categories[i];
         HashMap<String, String> map = new HashMap<>();
-        map.put(FileInfo.LOGO, "" + category.id);
-        map.put(FileInfo.NAME, category.name);
+        map.put(UIFileInfo.LOGO, "" + category.id);
+        map.put(UIFileInfo.NAME, category.name);
 //        map.put(FolderFragment.LAST_MODIFIED, category.desc);
         return map;
     }

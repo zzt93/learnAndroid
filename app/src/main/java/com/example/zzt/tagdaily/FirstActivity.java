@@ -44,7 +44,7 @@ public class FirstActivity extends Activity {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_first);
         if (BuildConfig.DEBUG) {
-            testKeyStore();
+//            testKeyStore();
             Crypt.testCrypt();
         }
     }

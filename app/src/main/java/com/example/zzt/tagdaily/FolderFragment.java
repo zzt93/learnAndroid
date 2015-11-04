@@ -12,7 +12,7 @@ import android.widget.ListAdapter;
 import android.widget.SimpleAdapter;
 import android.widget.TextView;
 
-import com.example.zzt.tagdaily.logic.FileInfo;
+import com.example.zzt.tagdaily.logic.UIFileInfo;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -48,7 +48,7 @@ public class FolderFragment extends Fragment implements AbsListView.OnItemClickL
     private String[] names;
     private int[] ids;
 
-    public static FolderFragment newInstance(ArrayList<FileInfo> fileInfos, int layoutId,
+    public static FolderFragment newInstance(ArrayList<UIFileInfo> UIFileInfos, int layoutId,
                                              String[] names, int[] ids) {
         FolderFragment fragment = new FolderFragment();
         Bundle args = new Bundle();
@@ -56,8 +56,8 @@ public class FolderFragment extends Fragment implements AbsListView.OnItemClickL
         fragment.names = names;
         fragment.ids = ids;
 
-        for (FileInfo fileInfo : fileInfos) {
-            fragment.category.add(fileInfo.convertFolderMap());
+        for (UIFileInfo UIFileInfo : UIFileInfos) {
+            fragment.category.add(UIFileInfo.convertFolderMap());
         }
 
         // give the data when onCreate() invoke need
@@ -173,8 +173,8 @@ public class FolderFragment extends Fragment implements AbsListView.OnItemClickL
         }
     }
 
-    public SimpleAdapter addListView(ArrayList<FileInfo> files) {
-        for (FileInfo file : files) {
+    public SimpleAdapter addListView(ArrayList<UIFileInfo> files) {
+        for (UIFileInfo file : files) {
             category.add(file.convertFolderMap());
         }
         return mAdapter;

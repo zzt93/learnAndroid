@@ -22,7 +22,7 @@ import javax.crypto.spec.IvParameterSpec;
 
 /**
  * Created by zzt on 10/5/15.
- * <p>
+ * <p/>
  * Usage:
  */
 public class Crypt {
@@ -32,14 +32,29 @@ public class Crypt {
     public static final String CRYPT_ALGO = "AES";
     public static final String MODE_PADDING = "/CBC/PKCS5Padding";
     public static int BLOCK_SIZE;
-    public static final String CHAR_NOT_BASE64 = "]";
+    /**
+     * char not in base64 for android is + /
+     */
+    public static final char CHAR_NOT_BASE64 = ']';
 
     static {
+        if (BuildConfig.DEBUG) {
+            testCharForBase64();
+        }
         try {
             BLOCK_SIZE = Cipher.getInstance(CRYPT_ALGO + MODE_PADDING).getBlockSize();
         } catch (NoSuchAlgorithmException | NoSuchPaddingException e) {
             Log.e(thisClass, "" + e);
             BLOCK_SIZE = 0;
+        }
+    }
+
+    private static void testCharForBase64() {
+        char c = CHAR_NOT_BASE64;
+//        https://en.wikipedia.org/wiki/Base64
+        if (Character.isDigit(c) || Character.isLetter(c)
+                || c == '+' || c == '/') {
+            throw new RuntimeException("wrong char for base64");
         }
     }
 
@@ -130,7 +145,7 @@ public class Crypt {
 
     public String decrypt(String s) throws NoSuchAlgorithmException {
         try {
-            String[] split = s.split(CHAR_NOT_BASE64);
+            String[] split = s.split("" + CHAR_NOT_BASE64);
             if (BuildConfig.DEBUG && split.length != 3) {
                 throw new IllegalArgumentException("decrypt string is broken");
             }

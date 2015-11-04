@@ -2,17 +2,15 @@ package com.example.zzt.tagdaily.fileChooser;
 
 import android.app.Activity;
 import android.app.FragmentTransaction;
-import android.content.Intent;
 import android.os.Bundle;
 import android.os.Environment;
 import android.view.Menu;
 import android.view.MenuItem;
-import android.widget.Toast;
 
 import com.example.zzt.tagdaily.FolderFragment;
 import com.example.zzt.tagdaily.R;
 import com.example.zzt.tagdaily.WithFragment;
-import com.example.zzt.tagdaily.logic.FileInfo;
+import com.example.zzt.tagdaily.logic.UIFileInfo;
 
 import java.io.File;
 import java.util.ArrayList;
@@ -20,7 +18,7 @@ import java.util.ArrayList;
 public class FilerChooser extends Activity {
 
     private FolderFragment folderFragment;
-    private ArrayList<FileInfo> fatherDirInfos = new ArrayList<>();
+    private ArrayList<UIFileInfo> fatherDirInfos = new ArrayList<>();
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -42,7 +40,7 @@ public class FilerChooser extends Activity {
             // Create a new Fragment to be placed in the activity layout
             folderFragment = FolderFragment.newInstance(
                     fatherDirInfos, R.layout.file_chooser_row,
-                    new String[]{FileInfo.LOGO, FileInfo.NAME, FileInfo.LAST_MODIFIED},
+                    new String[]{UIFileInfo.LOGO, UIFileInfo.NAME, UIFileInfo.LAST_MODIFIED},
                     new int[]{R.id.logo, R.id.desc1, R.id.desc2});
             // In case this activity was started with special instructions from an
             // Intent, pass the Intent's extras to the fragment as arguments
@@ -56,7 +54,7 @@ public class FilerChooser extends Activity {
         }
     }
 
-    private void createAndInitDir(ArrayList<FileInfo> fatherDirInfos) {
+    private void createAndInitDir(ArrayList<UIFileInfo> fatherDirInfos) {
         WithFragment.collectFile(fatherDirInfos, fileChooserBaseDir());
     }
 
