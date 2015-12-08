@@ -10,6 +10,7 @@ import java.io.BufferedOutputStream;
 import java.io.BufferedReader;
 import java.io.File;
 import java.io.FileInputStream;
+import java.io.FileNotFoundException;
 import java.io.FileOutputStream;
 import java.io.FileReader;
 import java.io.IOException;
@@ -41,6 +42,7 @@ import javax.crypto.spec.IvParameterSpec;
 public class FileLink {
 
     public static final double MAX_FILE_SIZE = Math.pow(2, 24);
+    public static final int ONE_TIME_ENCRYPT = 1024 * 1024;
     private static String thisClass = FileLink.class.getCanonicalName();
     /**
      * Target file information
@@ -162,31 +164,31 @@ public class FileLink {
 
         BufferedInputStream bufferedInputStream
                 = new BufferedInputStream(new FileInputStream(linkedFilePath));
-        int read;
-        while ((read = bufferedInputStream.read()) != -1) {
+        byte[] read = new byte[ONE_TIME_ENCRYPT];
+        while ((bufferedInputStream.read(read)) != -1) {
             cipherOutputStream.write(read);
         }
+        cipherOutputStream.close();
 
         return true;
     }
 
     public boolean deleteOriginal() {
-        // delete original file
         // TODO: 10/11/15 consider a dir
         return new File(linkedFilePath).delete();
     }
 
     /**
      * Decrypt all of the content of file under original folder
+     * and write it to some file
      *
-     * @return The decrypted byte array
      * @throws InvalidAlgorithmParameterException
      * @throws InvalidKeyException
      * @throws NoSuchAlgorithmException
      * @throws IOException
      * @throws UnrecoverableEntryException
      */
-    public void decryptAll() throws InvalidAlgorithmParameterException, InvalidKeyException, NoSuchAlgorithmException, IOException, UnrecoverableEntryException {
+    public void decryptAll() throws InvalidAlgorithmParameterException, InvalidKeyException, NoSuchAlgorithmException, UnrecoverableEntryException, IOException {
         DecryptedFile decryptedFile = decryptPart();
         File file = new File(encryptedFilePath);
         long length = file.length();
@@ -195,23 +197,26 @@ public class FileLink {
         }
         BufferedOutputStream bufferedOutputStream =
                 new BufferedOutputStream(new FileOutputStream(new File(linkedFilePath)));
-        int read;
-        while ((read = decryptedFile.read()) != -1) {
-            bufferedOutputStream.write(read);
+        byte[] write = new byte[ONE_TIME_ENCRYPT];
+        // If I don't close stream in encryption, it will have the following error because incomplete padding
+        // java.io.IOException: error:06065064:digital envelope routines:EVP_DecryptFinal_ex:bad decrypt
+        while ((decryptedFile.read(write)) != -1) {
+            bufferedOutputStream.write(write);
         }
+        decryptedFile.close();
+        bufferedOutputStream.close();
     }
 
     /**
      * @return A decrypted file you can get byte by byte or read more depend
      * on the memory or something else
-     * @throws IOException
      * @throws UnrecoverableEntryException
      * @throws InvalidAlgorithmParameterException
      * @throws InvalidKeyException
      * @throws NoSuchAlgorithmException
      */
     public DecryptedFile decryptPart()
-            throws IOException, UnrecoverableEntryException, InvalidAlgorithmParameterException, InvalidKeyException, NoSuchAlgorithmException {
+            throws UnrecoverableEntryException, InvalidAlgorithmParameterException, InvalidKeyException, NoSuchAlgorithmException, FileNotFoundException {
         Cipher cipher;
         try {
             cipher = Cipher.getInstance(Crypt.CRYPT_ALGO + Crypt.MODE_PADDING);
@@ -225,16 +230,21 @@ public class FileLink {
                 = new BufferedInputStream(new FileInputStream(encryptedFilePath));
         byte[] iv = new byte[cipher.getBlockSize()];
         byte[] salt = new byte[cipher.getBlockSize()];
-        int read = bufferedInputStream.read(iv);
-        int readS = bufferedInputStream.read(salt);
-        if (BuildConfig.DEBUG && read != cipher.getBlockSize()
-                &&readS != cipher.getBlockSize()) {
+        int readIV = 0;
+        int readS = 0;
+        try {
+            readIV = bufferedInputStream.read(iv);
+            readS = bufferedInputStream.read(salt);
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+        if (BuildConfig.DEBUG && readIV != cipher.getBlockSize()
+                && readS != cipher.getBlockSize()) {
             throw new AssertionError("can't read iv from file");
         }
         SecretKey secretKey = DeriveKey.recoverSecretKey(password, salt);
         // init cipher with key and iv
         cipher.init(Cipher.DECRYPT_MODE, secretKey, new IvParameterSpec(iv));
-        // TODO: 10/11/15 test whether read iv make it not decrypt iv
         CipherInputStream cipherInputStream = new CipherInputStream(bufferedInputStream, cipher);
         return new DecryptedFile(cipherInputStream);
     }

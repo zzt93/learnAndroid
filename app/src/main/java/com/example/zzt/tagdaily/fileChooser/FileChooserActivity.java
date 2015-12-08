@@ -1,4 +1,4 @@
-package com.example.zzt.tagdaily;
+package com.example.zzt.tagdaily.fileChooser;
 
 import android.app.Activity;
 import android.app.FragmentTransaction;
@@ -9,16 +9,22 @@ import android.os.Bundle;
 import android.util.Log;
 import android.view.Menu;
 import android.view.MenuItem;
+import android.webkit.MimeTypeMap;
 
+import com.example.zzt.tagdaily.BuildConfig;
+import com.example.zzt.tagdaily.FirstActivity;
+import com.example.zzt.tagdaily.R;
+import com.example.zzt.tagdaily.RemindDialog;
 import com.example.zzt.tagdaily.crypt.DecryptedFile;
+import com.example.zzt.tagdaily.imageViewer.ImageActivity;
 import com.example.zzt.tagdaily.logic.Category;
 import com.example.zzt.tagdaily.logic.Default;
-import com.example.zzt.tagdaily.logic.FileUtility;
 import com.example.zzt.tagdaily.logic.UIFileInfo;
 import com.example.zzt.tagdaily.crypt.FileLink;
 import com.example.zzt.tagdaily.logic.UriUtility;
 
 import java.io.File;
+import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.security.InvalidAlgorithmParameterException;
 import java.security.InvalidKeyException;
@@ -29,17 +35,22 @@ import java.util.HashMap;
 import java.util.List;
 
 
-public class WithFragment extends Activity implements
+public class FileChooserActivity extends Activity implements
         FolderFragment.FolderFragmentInteractionListener,
         DetailFileFragment.DetailFragmentInteractionListener {
 
     private static final int PICK_FILE_REQUEST_CODE = 1;
-    private static String thisClass = WithFragment.class.getCanonicalName();
+    private static final int DELETE_DECRYPTED_REQUEST_CODE = 2;
+    public static final String IMAGE_PATH = "imagePath";
+
+    private static String thisClass = FileChooserActivity.class.getCanonicalName();
     private FolderFragment folderFragment;
     private DetailFileFragment detailFragment;
+
     private ArrayList<UIFileInfo> fatherDirInfos = new ArrayList<>();
     private int fatherIndex = Default.DEFAULT_FOLDER_I;
     private HashMap<Integer, ArrayList<UIFileInfo>> childDirInfo = new HashMap<>();
+
     private String password;
 
     @Override
@@ -85,6 +96,7 @@ public class WithFragment extends Activity implements
 
     }
 
+
     private void createAndInitDir(Category[] values, ArrayList<UIFileInfo> fatherDirInfos, HashMap<Integer, ArrayList<UIFileInfo>> childDirInfo) {
         File dir = this.getBaseDir();
         for (File file : dir.listFiles()) {
@@ -105,22 +117,27 @@ public class WithFragment extends Activity implements
         File f = new File(this.getBaseDir(), values[Default.DEFAULT_FOLDER_I].getName());
         ArrayList<UIFileInfo> defaultFiles = new ArrayList<>();
         childDirInfo.put(Default.DEFAULT_FOLDER_I, defaultFiles);
-        collectFile(defaultFiles, f);
+        addFile(defaultFiles, f);
     }
 
-    public static void collectFile(ArrayList<UIFileInfo> childDirInfo, File f) {
+    public static void addFile(ArrayList<UIFileInfo> childDirInfo, File f) {
         if (!f.isDirectory()) {
             return;
         }
         for (File file : f.listFiles()) {
-            UIFileInfo UIFileInfo;
-            if (file.isDirectory()) {
-                UIFileInfo = new UIFileInfo(file, R.drawable.ic_folder_open_black_24dp);
-            } else {
-                UIFileInfo = new UIFileInfo(file, R.drawable.ic_insert_drive_file_black_24dp);
-            }
-            childDirInfo.add(UIFileInfo);
+            UIFileInfo uiFileInfo = createUiFileInfo(file);
+            childDirInfo.add(uiFileInfo);
         }
+    }
+
+    private static UIFileInfo createUiFileInfo(File file) {
+        UIFileInfo UIFileInfo;
+        if (file.isDirectory()) {
+            UIFileInfo = new UIFileInfo(file, R.drawable.ic_folder_open_black_24dp);
+        } else {
+            UIFileInfo = new UIFileInfo(file, R.drawable.ic_insert_drive_file_black_24dp);
+        }
+        return UIFileInfo;
     }
 
     private File getBaseDir() {
@@ -154,11 +171,10 @@ public class WithFragment extends Activity implements
                 break;
             case R.id.with_action_add:
                 // show chooser to show file
-                Intent intent = new Intent(Intent.ACTION_GET_CONTENT);
-                // TODO show different app to add -- a global var to remember current category
-                prepareType(intent);
+                Intent intent = intentWithChooser(Intent.ACTION_GET_CONTENT);
                 if (intentSafe(intent)) {
                     startActivityForResult(intent, PICK_FILE_REQUEST_CODE);
+                    Log.i(thisClass, "when will it run to here");
                 } else {
                     // remind use that no apps to open to add
                     Intent remind = new Intent(this, RemindDialog.class);
@@ -178,10 +194,16 @@ public class WithFragment extends Activity implements
      * <p/>
      * the app should show: camera, music, media, file manager
      *
-     * @param intent The intent
+     * @param action The action string
      */
-    private void prepareType(Intent intent) {
+    private Intent intentWithChooser(String action) {
+        Intent intent = new Intent(action);
+
+        String title = getResources().getString(R.string.chooser_title);
+        Intent chooser = Intent.createChooser(intent, title);
+
         intent.setType("*/*");
+        return chooser;
     }
 
     /**
@@ -193,35 +215,63 @@ public class WithFragment extends Activity implements
      */
     @Override
     protected void onActivityResult(int requestCode, int resultCode, Intent data) {
-        if (requestCode == PICK_FILE_REQUEST_CODE && resultCode == RESULT_OK) {
-            Uri fileUri = data.getData();
+        if (resultCode == RESULT_OK) {
+            switch (requestCode) {
+                case PICK_FILE_REQUEST_CODE:
+                    Uri fileUri = data.getData();
 
-            if (BuildConfig.DEBUG) {
-                FileUtility.deleteAllFiles(currentSelectedDir());
-            }
+                    if (BuildConfig.DEBUG) {
+//                FileUtility.deleteAllFiles(currentSelectedDir());
+                    }
 
-            // create a file save the content under the related folder
-            String path = UriUtility.getPath(this, fileUri);
-            String name = FileLink.getNameFromPath(path);
-            FileLink file;
-            try {
-                file = new FileLink(new File(currentSelectedDir(), name), path, password);
-            } catch (IOException | NoSuchAlgorithmException e) {
-                Log.e(thisClass, "File write failed: " + e.toString());
-                return;
+                    // create a file save the content under the related folder
+                    String path = UriUtility.getPath(this, fileUri);
+                    String name = FileLink.getNameFromPath(path);
+                    FileLink file;
+                    File saveFile;
+                    try {
+                        saveFile = new File(currentSelectedDir(), name);
+                        file = new FileLink(saveFile, path, password);
+                    } catch (IOException | NoSuchAlgorithmException e) {
+                        Log.e(thisClass, "File write failed: " + e.toString());
+                        return;
+                    }
+                    try {
+                        file.encrypt();
+                        if (!file.deleteOriginal()) {
+                            throw new RuntimeException("fail to delete original file");
+                        }
+                    } catch (IOException e) {
+                        Log.e(thisClass, "File encrypt failed: " + e.toString());
+                    } catch (NoSuchAlgorithmException | UnrecoverableEntryException | InvalidKeyException e) {
+                        Log.e(thisClass, " failed: " + e.toString());
+                    }
+                    addToChildInfo(saveFile);
+                    // update the view as if it is clicked
+                    folderFragmentClick(fatherIndex);
+                    // add to child
+                    break;
+
+                case DELETE_DECRYPTED_REQUEST_CODE:
+
+                    Uri uri = data.getData();
+                    String filePath = UriUtility.getPath(this, uri);
+                    if (filePath != null) {
+                        // TODO: 12/8/15 delete when destroy?
+//                        new File(filePath).delete();
+                    }
+
+                    break;
             }
-            try {
-                file.encrypt();
-                // TODO: 11/4/15 recover it after check
-//                file.deleteOriginal();
-            } catch (IOException e) {
-                Log.e(thisClass, "File encrypt failed: " + e.toString());
-            } catch (NoSuchAlgorithmException | UnrecoverableEntryException | InvalidKeyException e) {
-                Log.e(thisClass, " failed: " + e.toString());
-            }
-            folderFragmentClick(fatherIndex);
-            // add to child
+        } else {
+            Log.e(thisClass, " fail to start activity " + data);
         }
+    }
+
+    private void addToChildInfo(File saveFile) {
+        ArrayList<UIFileInfo> uiFileInfos = childDirInfo.get(fatherIndex);
+        uiFileInfos.add(createUiFileInfo(saveFile));
+        childDirInfo.put(fatherIndex, uiFileInfos);
     }
 
     private File currentSelectedDir() {
@@ -251,9 +301,10 @@ public class WithFragment extends Activity implements
         ArrayList<UIFileInfo> files = childDirInfo.get(fatherIndex);
         if (files == null) {
             files = new ArrayList<>();
-            collectFile(files, dir);
+            addFile(files, dir);
         }
-
+//        ArrayList<UIFileInfo> files = new ArrayList<>();
+//        addFile(files, dir);
         detailFragment.clearListView();
         detailFragment.addListView(files)
                 .notifyDataSetChanged();
@@ -267,7 +318,7 @@ public class WithFragment extends Activity implements
 //        FolderFragment folders = (FolderFragment)
 //                getFragmentManager().findFragmentById(R.id.folder_fragment_container);
 
-        if (position >= childDirInfo.size()) {
+        if (position >= childDirInfo.get(fatherIndex).size()) {
             return;
         }
         UIFileInfo UIFileInfo = childDirInfo.get(fatherIndex).get(position);
@@ -299,23 +350,39 @@ public class WithFragment extends Activity implements
                 Log.e(thisClass, " failed: " + e.toString());
             } catch (NoSuchAlgorithmException e) {
                 Log.e(thisClass, " failed: " + e.toString());
-            } catch (IOException e) {
-                Log.e(thisClass, " failed: " + e.toString());
             } catch (UnrecoverableEntryException e) {
                 Log.e(thisClass, " failed: " + e.toString());
+            } catch (FileNotFoundException e) {
+                Log.e(thisClass, " failed: " + e.toString());
+            } catch (IOException e) {
+                Log.e(thisClass, " failed: " + e.toString());
+
             }
-            Uri path = Uri.parse(fileLink.getLinkedFilePath());
-            Intent intent = new Intent(Intent.ACTION_VIEW);
-            // TODO set type by suffix
-            intent.setDataAndType(path, "*/*");
+            Intent intent = new Intent(this, ImageActivity.class);
+            intent.putExtra(IMAGE_PATH, fileLink.getLinkedFilePath());
 
             if (intentSafe(intent)) {
-                startActivity(intent);
+                startActivityForResult(intent, DELETE_DECRYPTED_REQUEST_CODE);
             }
 
-            // TODO: 11/4/15 will not run to here without view is finished?
-            fileLink.deleteOriginal();
         }
+    }
+
+    private String getMimeType(String path) {
+        MimeTypeMap map = MimeTypeMap.getSingleton();
+        String ext = MimeTypeMap.getFileExtensionFromUrl(path);
+        if (ext.isEmpty()) {
+            ext = path.substring(path.lastIndexOf('.') + 1);
+        }
+        if (ext.equals("jpg")) {
+            ext = "jpeg";
+        }
+        String mimeType = map.getMimeTypeFromExtension(ext);
+
+        if (mimeType == null) {
+            mimeType = "*/*";
+        }
+        return mimeType;
     }
 //
 //    public Intent setIntentChooser(Intent intent, Uri path, String type) {

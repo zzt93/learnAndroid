@@ -6,7 +6,7 @@
     android:layout_height="match_parent"
     android:baselineAligned="false"
     android:orientation="horizontal"
-    tools:context="com.example.zzt.tagdaily.FolderFragment"
+    tools:context=".fileChooser.FolderFragment"
     >
 
     <!--<GridView-->

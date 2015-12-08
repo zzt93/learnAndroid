@@ -1,6 +1,6 @@
 <menu xmlns:android="http://schemas.android.com/apk/res/android"
       xmlns:tools="http://schemas.android.com/tools"
-      tools:context="com.example.zzt.tagdaily.WithFragment">
+      tools:context=".fileChooser.FileChooserActivity">
     <item
         android:id="@+id/with_action_settings"
         android:orderInCategory="100"

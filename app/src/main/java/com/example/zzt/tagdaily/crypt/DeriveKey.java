@@ -1,5 +1,7 @@
 package com.example.zzt.tagdaily.crypt;
 
+import android.util.Log;
+
 import java.security.NoSuchAlgorithmException;
 import java.security.SecureRandom;
 import java.security.spec.InvalidKeySpecException;
@@ -20,6 +22,8 @@ public class DeriveKey {
     public static final int ITERATION_COUNT = 2000;
     private static final int PASSWORD_ITERATIONS = 2000;
     private static final int PASSWORD_BITS = 160;
+    private static final String RANDOM_ALGO = "SHA1PRNG";
+    private static String thisClass = DeriveKey.class.getCanonicalName();
 
     /**
      * Note that for PBKDF2, you would be wise to keep to ASCII passwords only.
@@ -46,7 +50,13 @@ public class DeriveKey {
      */
     public static byte[] getRandomByte(int keyBits) {
         int saltLength = keyBits / 8; // same size as key output
-        SecureRandom random = new SecureRandom();
+        SecureRandom random;
+        try {
+            random = SecureRandom.getInstance(RANDOM_ALGO);
+        } catch (NoSuchAlgorithmException e) {
+            Log.e(thisClass, ": can't get such random " + e);
+            return new byte[0];
+        }
         byte[] salt = new byte[saltLength];
         random.nextBytes(salt);
         return salt;
@@ -61,7 +71,7 @@ public class DeriveKey {
             keyFactory = SecretKeyFactory
                     .getInstance("PBKDF2WithHmacSHA1");
             SecretKey secretKey = keyFactory.generateSecret(keySpec);
-            // TODO: 10/15/15 test whether upper secret key doesn't have a iv
+            // TODO: 10/15/15 test whether upper secret key have a iv
             keyBytes = secretKey.getEncoded();
         } catch (NoSuchAlgorithmException | InvalidKeySpecException e) {
             e.printStackTrace();

@@ -1,18 +1,20 @@
 <?xml version="1.0" encoding="utf-8"?>
 <manifest xmlns:android="http://schemas.android.com/apk/res/android"
-    package="com.example.zzt.tagdaily" >
+    package="com.example.zzt.tagdaily">
 
-    <uses-permission android:name="android.permission.WRITE_EXTERNAL_STORAGE" />
+    <uses-permission
+        android:name="android.permission.WRITE_EXTERNAL_STORAGE"
+        android:maxSdkVersion="18" />
 
     <application
         android:allowBackup="true"
         android:fullBackupContent="true"
         android:icon="@mipmap/ic_launcher"
-        android:label="@string/app_name" >
+        android:label="@string/app_name">
         <activity
             android:name=".FirstActivity"
             android:label="@string/app_name"
-            android:theme="@style/MainTheme" >
+            android:theme="@style/MainTheme">
             <intent-filter>
                 <action android:name="android.intent.action.MAIN" />
 
@@ -23,7 +25,7 @@
             android:name=".DisplayMessageActivity"
             android:label="@string/title_activity_display_message"
             android:parentActivityName=".FirstActivity"
-            android:theme="@style/SecondTheme" >
+            android:theme="@style/SecondTheme">
             <meta-data
                 android:name="android.support.PARENT_ACTIVITY"
                 android:value="com.example.zzt.tagdaily.FirstActivity" />
@@ -32,7 +34,7 @@
             android:name=".TransparentTheme"
             android:label="@string/title_activity_transparent_theme"
             android:parentActivityName=".FirstActivity"
-            android:theme="@android:style/Theme.Wallpaper" >
+            android:theme="@android:style/Theme.Wallpaper">
             <meta-data
                 android:name="android.support.PARENT_ACTIVITY"
                 android:value="com.example.zzt.tagdaily.FirstActivity" />
@@ -40,25 +42,17 @@
         <activity
             android:name=".RemindDialog"
             android:label="@string/title_activity_remind_dialog"
-            android:theme="@android:style/Theme.Dialog" >
-        </activity>
+            android:theme="@android:style/Theme.Dialog" />
         <activity
-            android:name=".WithFragment"
+            android:name=".fileChooser.FileChooserActivity"
             android:label="@string/title_activity_with_fragment"
             android:parentActivityName=".FirstActivity"
-            android:theme="@style/MainTheme" >
+            android:theme="@style/MainTheme">
             <meta-data
                 android:name="android.support.PARENT_ACTIVITY"
                 android:value="com.example.zzt.tagdaily.FirstActivity" />
         </activity>
-        <activity
-            android:name=".fileChooser.FilerChooser"
-            android:label="@string/title_activity_filer_chooser"
-            android:parentActivityName=".WithFragment" >
-            <meta-data
-                android:name="android.support.PARENT_ACTIVITY"
-                android:value="com.example.zzt.tagdaily.WithFragment" />
-        </activity>
+        <activity android:name=".imageViewer.ImageActivity"></activity>
     </application>
 
 </manifest>

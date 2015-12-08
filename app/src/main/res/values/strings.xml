@@ -15,10 +15,11 @@
     <string name="action_dialog">show dialog</string>
     <string name="title_activity_with_fragment">WithFragment</string>
 
-<!-- TODO: Remove or change this placeholder text -->
+    <!-- TODO: Remove or change this placeholder text -->
     <string name="hello_blank_fragment" translatable="false">Hello blank fragment</string>
     <string name="action_fragment">show fragment</string>
     <string name="empty_list">no files for the time being, add by press add on the menu</string>
     <string name="title_activity_filer_chooser">FilerChooser</string>
     <string name="chooser_title">open with</string>
+    <string name="imageStr">image</string>
 </resources>
