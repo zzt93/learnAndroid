@@ -1,5 +1,6 @@
 package com.example.zzt.tagdaily.crypt;
 
+import android.net.Uri;
 import android.util.Log;
 
 import com.example.zzt.tagdaily.BuildConfig;
@@ -50,6 +51,7 @@ public class FileLink {
     private String linkedFilePath;
     private String encryptedFilePath;
     private String password;
+    private String fileUri;
 
     /**
      * To reuse an added fileLink, can't change linkedFilePath
@@ -65,35 +67,38 @@ public class FileLink {
             throw new RuntimeException("Invalid FileLink");
         }
         initPath(saveFile);
-        initNewPath(linkedFilePath);
+        initEncryptedPath(linkedFilePath);
         this.password = password;
     }
 
-    public FileLink(File saveFile, String linkedFilePath, String password) throws IOException, NoSuchAlgorithmException {
+    public FileLink(File saveFile, String linkedFilePath, String fileUri, String password) throws IOException, NoSuchAlgorithmException {
         if (saveFile.exists()) {
-            initPath(saveFile);
+            throw new RuntimeException("Invalid FileLink");
         } else {
             /**
              * when will file already exist:
-             *  1. re-add a already added file
+             *  1. re-add a already added file -- impossible
              *  2. reuse a added file
              */
             this.linkedFilePath = linkedFilePath;
-            writeToFile(saveFile, linkedFilePath);
+            this.fileUri = fileUri;
+            writeToFile(saveFile, linkedFilePath, fileUri);
         }
-        initNewPath(linkedFilePath);
+        initEncryptedPath(linkedFilePath);
         this.password = password;
     }
 
-    private void initNewPath(String path) {
+    private void initEncryptedPath(String path) {
         // TODO: 10/11/15 consider a dir
         String[] dirNameFromPath = getDirNameFromPath(path);
         encryptedFilePath = dirNameFromPath[0] + File.separator + Default.DEFAULT_PREFIX + dirNameFromPath[1];
     }
 
-    public void writeToFile(File file, String content) throws IOException {
+    public void writeToFile(File file, String content, String fileUri) throws IOException {
         OutputStreamWriter outputStreamWriter = new OutputStreamWriter(new FileOutputStream(file), "utf-8");
         outputStreamWriter.write(content);
+        outputStreamWriter.write("\n");
+        outputStreamWriter.write(fileUri);
         outputStreamWriter.flush();
         outputStreamWriter.close();
     }
@@ -101,6 +106,7 @@ public class FileLink {
     private void initPath(File file) throws IOException {
         BufferedReader br = new BufferedReader(new FileReader(file));
         linkedFilePath = br.readLine();
+        fileUri = br.readLine();
         br.close();
     }
 
@@ -251,6 +257,10 @@ public class FileLink {
 
     public String getLinkedFilePath() {
         return linkedFilePath;
+    }
+
+    public String getFileUri() {
+        return fileUri;
     }
 
     public String getPassword() {

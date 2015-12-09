@@ -1,7 +1,9 @@
 package com.example.zzt.tagdaily.fileChooser;
 
 import android.app.Activity;
+import android.app.AlertDialog;
 import android.app.FragmentTransaction;
+import android.content.DialogInterface;
 import android.content.Intent;
 import android.content.pm.PackageManager;
 import android.net.Uri;
@@ -10,6 +12,7 @@ import android.util.Log;
 import android.view.Menu;
 import android.view.MenuItem;
 import android.webkit.MimeTypeMap;
+import android.widget.EditText;
 
 import com.example.zzt.tagdaily.BuildConfig;
 import com.example.zzt.tagdaily.FirstActivity;
@@ -41,6 +44,7 @@ public class FileChooserActivity extends Activity implements
 
     private static final int PICK_FILE_REQUEST_CODE = 1;
     private static final int DELETE_DECRYPTED_REQUEST_CODE = 2;
+    public static final String IMAGE_URI = "imageUri";
     public static final String IMAGE_PATH = "imagePath";
 
     private static String thisClass = FileChooserActivity.class.getCanonicalName();
@@ -51,7 +55,11 @@ public class FileChooserActivity extends Activity implements
     private int fatherIndex = Default.DEFAULT_FOLDER_I;
     private HashMap<Integer, ArrayList<UIFileInfo>> childDirInfo = new HashMap<>();
 
-    private String password;
+    /**
+     * This field have to be static because if I jump to another
+     * activity and back, this activity may be re-created without password
+     */
+    private static String password;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -59,7 +67,13 @@ public class FileChooserActivity extends Activity implements
         setContentView(R.layout.activity_with_fragment);
 
         Intent intent = getIntent();
-        password = intent.getStringExtra(FirstActivity.PASSWORD);
+        if (password == null) {
+            password = intent.getStringExtra(FirstActivity.PASSWORD);
+        }
+        if (password == null) {
+            showDialog();
+        }
+
         // set the secretKey for this fragment to encrypt/decrypt
 
         createAndInitDir(Category.values(), fatherDirInfos, childDirInfo);
@@ -72,6 +86,7 @@ public class FileChooserActivity extends Activity implements
             // then we don't need to do anything and should return or else
             // we could end up with overlapping fragments.
             if (savedInstanceState != null) {
+                // recover password from original state
                 return;
             }
 
@@ -96,6 +111,46 @@ public class FileChooserActivity extends Activity implements
 
     }
 
+    private void showDialog() {
+        AlertDialog.Builder alert = new AlertDialog.Builder(this);
+
+        alert.setTitle("Title");
+        alert.setMessage("Message");
+
+// Set an EditText view to get user input
+        final EditText input = new EditText(this);
+        alert.setView(input);
+
+        alert.setPositiveButton("Ok", new DialogInterface.OnClickListener() {
+            public void onClick(DialogInterface dialog, int whichButton) {
+//                password = input.getText();
+            }
+        });
+
+        alert.setNegativeButton("Cancel", new DialogInterface.OnClickListener() {
+            public void onClick(DialogInterface dialog, int whichButton) {
+            }
+        });
+
+        alert.show();
+    }
+
+    @Override
+    public void onSaveInstanceState(Bundle savedInstanceState) {
+        super.onSaveInstanceState(savedInstanceState);
+        // Save UI state changes to the savedInstanceState.
+        // This bundle will be passed to onCreate if the process is
+        // killed and restarted.
+        savedInstanceState.putString(FirstActivity.PASSWORD, password);
+    }
+
+    @Override
+    protected void onRestoreInstanceState(Bundle savedInstanceState) {
+        super.onRestoreInstanceState(savedInstanceState);
+        if (savedInstanceState != null) {
+            password = savedInstanceState.getString(FirstActivity.PASSWORD);
+        }
+    }
 
     private void createAndInitDir(Category[] values, ArrayList<UIFileInfo> fatherDirInfos, HashMap<Integer, ArrayList<UIFileInfo>> childDirInfo) {
         File dir = this.getBaseDir();
@@ -215,14 +270,15 @@ public class FileChooserActivity extends Activity implements
      */
     @Override
     protected void onActivityResult(int requestCode, int resultCode, Intent data) {
+        Log.e(thisClass, "result");
         if (resultCode == RESULT_OK) {
             switch (requestCode) {
                 case PICK_FILE_REQUEST_CODE:
                     Uri fileUri = data.getData();
 
-                    if (BuildConfig.DEBUG) {
+//                    if (BuildConfig.DEBUG) {
 //                FileUtility.deleteAllFiles(currentSelectedDir());
-                    }
+//                    }
 
                     // create a file save the content under the related folder
                     String path = UriUtility.getPath(this, fileUri);
@@ -231,7 +287,7 @@ public class FileChooserActivity extends Activity implements
                     File saveFile;
                     try {
                         saveFile = new File(currentSelectedDir(), name);
-                        file = new FileLink(saveFile, path, password);
+                        file = new FileLink(saveFile, path, fileUri.toString(), password);
                     } catch (IOException | NoSuchAlgorithmException e) {
                         Log.e(thisClass, "File write failed: " + e.toString());
                         return;
@@ -254,11 +310,12 @@ public class FileChooserActivity extends Activity implements
 
                 case DELETE_DECRYPTED_REQUEST_CODE:
 
-                    Uri uri = data.getData();
-                    String filePath = UriUtility.getPath(this, uri);
+                    Log.e(thisClass, "result");
+                    String filePath = data.getStringExtra(IMAGE_PATH);
                     if (filePath != null) {
-                        // TODO: 12/8/15 delete when destroy?
-//                        new File(filePath).delete();
+                        if (!new File(filePath).delete()) {
+                            throw new RuntimeException("fail to delete file");
+                        }
                     }
 
                     break;
@@ -359,6 +416,7 @@ public class FileChooserActivity extends Activity implements
 
             }
             Intent intent = new Intent(this, ImageActivity.class);
+            intent.putExtra(IMAGE_URI, fileLink.getFileUri());
             intent.putExtra(IMAGE_PATH, fileLink.getLinkedFilePath());
 
             if (intentSafe(intent)) {

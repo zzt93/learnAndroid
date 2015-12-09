@@ -71,7 +71,6 @@ public class DeriveKey {
             keyFactory = SecretKeyFactory
                     .getInstance("PBKDF2WithHmacSHA1");
             SecretKey secretKey = keyFactory.generateSecret(keySpec);
-            // TODO: 10/15/15 test whether upper secret key have a iv
             keyBytes = secretKey.getEncoded();
         } catch (NoSuchAlgorithmException | InvalidKeySpecException e) {
             e.printStackTrace();
