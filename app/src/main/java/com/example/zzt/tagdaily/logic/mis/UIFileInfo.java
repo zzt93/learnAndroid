@@ -1,8 +1,11 @@
-package com.example.zzt.tagdaily.logic;
+package com.example.zzt.tagdaily.logic.mis;
+
+import com.example.zzt.tagdaily.R;
 
 import java.io.File;
 import java.text.DateFormat;
 import java.text.SimpleDateFormat;
+import java.util.ArrayList;
 import java.util.Date;
 import java.util.HashMap;
 
@@ -24,6 +27,26 @@ public class UIFileInfo {
     public UIFileInfo(File file, int id) {
         this.file = file;
         this.id = id;
+    }
+
+    public static UIFileInfo createUiFileInfo(File file) {
+        UIFileInfo UIFileInfo;
+        if (file.isDirectory()) {
+            UIFileInfo = new UIFileInfo(file, R.drawable.ic_folder_open_black_24dp);
+        } else {
+            UIFileInfo = new UIFileInfo(file, R.drawable.ic_insert_drive_file_black_24dp);
+        }
+        return UIFileInfo;
+    }
+
+    public static void addFile(ArrayList<UIFileInfo> uiFileInfos, File dir) {
+        if (!dir.isDirectory()) {
+            return;
+        }
+        for (File file : dir.listFiles()) {
+            UIFileInfo uiFileInfo = createUiFileInfo(file);
+            uiFileInfos.add(uiFileInfo);
+        }
     }
 
     public HashMap<String, String> convertFileMap() {

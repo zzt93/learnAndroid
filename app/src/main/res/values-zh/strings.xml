@@ -16,4 +16,11 @@
     <string name="empty_list">现在还没有文件, 点击添加保存文件</string>
     <string name="title_activity_filer_chooser">浏览</string>
     <string name="chooser_title">打开通过</string>
+    <string name="imageStr">图片</string>
+    <string name="file_detail">文件详情</string>
+    <string name="file_delete">删除文件</string>
+    <string name="file_deleted">删除成功</string>
+    <string name="file_detail_show">显示完成</string>
+    <string name="file_recover">恢复文件</string>
+    <string name="file_recovered">恢复成功</string>
 </resources>

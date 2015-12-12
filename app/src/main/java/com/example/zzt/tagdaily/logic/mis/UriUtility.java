@@ -1,4 +1,4 @@
-package com.example.zzt.tagdaily.logic;
+package com.example.zzt.tagdaily.logic.mis;
 
 import android.content.ContentUris;
 import android.content.Context;

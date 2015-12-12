@@ -45,7 +45,7 @@
             android:label="@string/title_activity_remind_dialog"
             android:theme="@android:style/Theme.Dialog" />
         <activity
-            android:name=".fileChooser.FileChooserActivity"
+            android:name=".view.fileChooser.FileChooserActivity"
             android:label="@string/title_activity_with_fragment"
             android:parentActivityName=".FirstActivity"
             android:theme="@style/MainTheme">
@@ -53,8 +53,8 @@
                 android:name="android.support.PARENT_ACTIVITY"
                 android:value="com.example.zzt.tagdaily.FirstActivity" />
         </activity>
-        <activity android:name=".imageViewer.ImageActivity"
-            android:parentActivityName=".fileChooser.FileChooserActivity">
+        <activity android:name=".view.imageViewer.ImageActivity"
+            android:parentActivityName=".view.fileChooser.FileChooserActivity">
 
         </activity>
     </application>

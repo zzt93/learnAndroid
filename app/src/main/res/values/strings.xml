@@ -22,4 +22,10 @@
     <string name="title_activity_filer_chooser">FilerChooser</string>
     <string name="chooser_title">open with</string>
     <string name="imageStr">image</string>
+    <string name="file_delete">delete</string>
+    <string name="file_detail">detail</string>
+    <string name="file_deleted">deleted</string>
+    <string name="file_detail_show">show the detail</string>
+    <string name="file_recover">recover</string>
+    <string name="file_recovered">recovered</string>
 </resources>

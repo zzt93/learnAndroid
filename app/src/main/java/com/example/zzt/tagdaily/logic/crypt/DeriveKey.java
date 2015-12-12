@@ -1,4 +1,4 @@
-package com.example.zzt.tagdaily.crypt;
+package com.example.zzt.tagdaily.logic.crypt;
 
 import android.util.Log;
 

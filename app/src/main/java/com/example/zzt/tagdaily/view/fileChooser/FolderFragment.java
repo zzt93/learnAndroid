@@ -1,4 +1,4 @@
-package com.example.zzt.tagdaily.fileChooser;
+package com.example.zzt.tagdaily.view.fileChooser;
 
 import android.app.Activity;
 import android.app.Fragment;
@@ -13,7 +13,7 @@ import android.widget.SimpleAdapter;
 import android.widget.TextView;
 
 import com.example.zzt.tagdaily.R;
-import com.example.zzt.tagdaily.logic.UIFileInfo;
+import com.example.zzt.tagdaily.logic.mis.UIFileInfo;
 
 import java.util.ArrayList;
 import java.util.List;

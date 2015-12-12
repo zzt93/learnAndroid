@@ -1,6 +1,7 @@
-package com.example.zzt.tagdaily.imageViewer;
+package com.example.zzt.tagdaily.view.imageViewer;
 
 import android.app.Activity;
+import android.content.Context;
 import android.content.Intent;
 import android.graphics.Point;
 import android.net.Uri;
@@ -11,13 +12,21 @@ import android.view.MenuItem;
 import android.widget.ImageView;
 
 import com.example.zzt.tagdaily.R;
-import com.example.zzt.tagdaily.fileChooser.FileChooserActivity;
+import com.example.zzt.tagdaily.logic.crypt.FileEncryption;
+import com.example.zzt.tagdaily.view.fileChooser.FileChooserActivity;
 import com.squareup.picasso.Picasso;
 
 public class ImageActivity extends Activity {
 
     private String path;
     private static String thisClass = ImageActivity.class.getCanonicalName();
+
+    public static Intent getMyImgIntent(Context context, FileEncryption fileEncryption) {
+        Intent intent = new Intent(context, ImageActivity.class);
+        intent.putExtra(FileChooserActivity.IMAGE_URI, fileEncryption.getFileUri());
+        intent.putExtra(FileChooserActivity.IMAGE_PATH, fileEncryption.getLinkedFilePath());
+        return intent;
+    }
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {

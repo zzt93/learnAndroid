@@ -1,11 +1,11 @@
-package com.example.zzt.tagdaily.crypt;
+package com.example.zzt.tagdaily.logic.crypt;
 
 
 import android.util.Base64;
 import android.util.Log;
 
 import com.example.zzt.tagdaily.BuildConfig;
-import com.example.zzt.tagdaily.logic.Default;
+import com.example.zzt.tagdaily.logic.mis.Default;
 
 import java.io.UnsupportedEncodingException;
 import java.security.InvalidAlgorithmParameterException;

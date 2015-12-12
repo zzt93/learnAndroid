@@ -1,30 +1,34 @@
-package com.example.zzt.tagdaily.fileChooser;
+package com.example.zzt.tagdaily.view.fileChooser;
 
 import android.app.Activity;
 import android.app.AlertDialog;
 import android.app.FragmentTransaction;
 import android.content.DialogInterface;
 import android.content.Intent;
-import android.content.pm.PackageManager;
 import android.net.Uri;
 import android.os.Bundle;
 import android.util.Log;
 import android.view.Menu;
 import android.view.MenuItem;
-import android.webkit.MimeTypeMap;
 import android.widget.EditText;
+import android.widget.Toast;
 
-import com.example.zzt.tagdaily.BuildConfig;
 import com.example.zzt.tagdaily.FirstActivity;
 import com.example.zzt.tagdaily.R;
 import com.example.zzt.tagdaily.RemindDialog;
-import com.example.zzt.tagdaily.crypt.DecryptedFile;
-import com.example.zzt.tagdaily.imageViewer.ImageActivity;
-import com.example.zzt.tagdaily.logic.Category;
-import com.example.zzt.tagdaily.logic.Default;
-import com.example.zzt.tagdaily.logic.UIFileInfo;
-import com.example.zzt.tagdaily.crypt.FileLink;
-import com.example.zzt.tagdaily.logic.UriUtility;
+import com.example.zzt.tagdaily.logic.crypt.DecryptedFile;
+import com.example.zzt.tagdaily.logic.crypt.EncryptionException;
+import com.example.zzt.tagdaily.logic.crypt.FileEncryption;
+import com.example.zzt.tagdaily.logic.fileChooser.FileChooserBL;
+import com.example.zzt.tagdaily.logic.fileChooser.MenuDelete;
+import com.example.zzt.tagdaily.logic.fileChooser.MenuDetail;
+import com.example.zzt.tagdaily.logic.fileChooser.MenuOp;
+import com.example.zzt.tagdaily.logic.fileChooser.MenuRecover;
+import com.example.zzt.tagdaily.logic.mis.Category;
+import com.example.zzt.tagdaily.logic.mis.Default;
+import com.example.zzt.tagdaily.logic.mis.FileUtility;
+import com.example.zzt.tagdaily.logic.mis.UIFileInfo;
+import com.example.zzt.tagdaily.logic.mis.UriUtility;
 
 import java.io.File;
 import java.io.FileNotFoundException;
@@ -35,9 +39,11 @@ import java.security.NoSuchAlgorithmException;
 import java.security.UnrecoverableEntryException;
 import java.util.ArrayList;
 import java.util.HashMap;
-import java.util.List;
 
 
+/**
+ * This class implements the view of file manager by folderFragment and detailFragment
+ */
 public class FileChooserActivity extends Activity implements
         FolderFragment.FolderFragmentInteractionListener,
         DetailFileFragment.DetailFragmentInteractionListener {
@@ -60,6 +66,8 @@ public class FileChooserActivity extends Activity implements
      * activity and back, this activity may be re-created without password
      */
     private static String password;
+    private static ArrayList<String> delPaths = new ArrayList<>();
+    private FileChooserBL fileChooserBL;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -71,12 +79,12 @@ public class FileChooserActivity extends Activity implements
             password = intent.getStringExtra(FirstActivity.PASSWORD);
         }
         if (password == null) {
-            showDialog();
+            showPasswordDialog();
         }
 
         // set the secretKey for this fragment to encrypt/decrypt
-
-        createAndInitDir(Category.values(), fatherDirInfos, childDirInfo);
+        fileChooserBL = new FileChooserBL(this);
+        fileChooserBL.createAndInitDir(Category.values(), fatherDirInfos, childDirInfo);
         // Check that the activity is using the layout version with
         // the fragment_container FrameLayout
         if (findViewById(R.id.folder_fragment_container) != null
@@ -86,7 +94,6 @@ public class FileChooserActivity extends Activity implements
             // then we don't need to do anything and should return or else
             // we could end up with overlapping fragments.
             if (savedInstanceState != null) {
-                // recover password from original state
                 return;
             }
 
@@ -111,19 +118,19 @@ public class FileChooserActivity extends Activity implements
 
     }
 
-    private void showDialog() {
+    private void showPasswordDialog() {
         AlertDialog.Builder alert = new AlertDialog.Builder(this);
 
-        alert.setTitle("Title");
-        alert.setMessage("Message");
+        alert.setTitle("Password");
+        alert.setMessage("Enter password again");
 
-// Set an EditText view to get user input
+        // Set an EditText view to get user input
         final EditText input = new EditText(this);
         alert.setView(input);
 
         alert.setPositiveButton("Ok", new DialogInterface.OnClickListener() {
             public void onClick(DialogInterface dialog, int whichButton) {
-//                password = input.getText();
+                password = input.getText().toString();
             }
         });
 
@@ -152,52 +159,6 @@ public class FileChooserActivity extends Activity implements
         }
     }
 
-    private void createAndInitDir(Category[] values, ArrayList<UIFileInfo> fatherDirInfos, HashMap<Integer, ArrayList<UIFileInfo>> childDirInfo) {
-        File dir = this.getBaseDir();
-        for (File file : dir.listFiles()) {
-            System.out.println(file.getName());
-        }
-        for (Category cate : values) {
-            File f = new File(this.getBaseDir(), cate.getName());
-            if (!f.exists()) {
-                boolean res = f.mkdir();
-                if (!res) {
-                    throw new RuntimeException("can't make dir");
-                }
-            }
-            fatherDirInfos.add(new UIFileInfo(f, R.mipmap.ic_launcher));
-        }
-
-        // init detail file
-        File f = new File(this.getBaseDir(), values[Default.DEFAULT_FOLDER_I].getName());
-        ArrayList<UIFileInfo> defaultFiles = new ArrayList<>();
-        childDirInfo.put(Default.DEFAULT_FOLDER_I, defaultFiles);
-        addFile(defaultFiles, f);
-    }
-
-    public static void addFile(ArrayList<UIFileInfo> childDirInfo, File f) {
-        if (!f.isDirectory()) {
-            return;
-        }
-        for (File file : f.listFiles()) {
-            UIFileInfo uiFileInfo = createUiFileInfo(file);
-            childDirInfo.add(uiFileInfo);
-        }
-    }
-
-    private static UIFileInfo createUiFileInfo(File file) {
-        UIFileInfo UIFileInfo;
-        if (file.isDirectory()) {
-            UIFileInfo = new UIFileInfo(file, R.drawable.ic_folder_open_black_24dp);
-        } else {
-            UIFileInfo = new UIFileInfo(file, R.drawable.ic_insert_drive_file_black_24dp);
-        }
-        return UIFileInfo;
-    }
-
-    private File getBaseDir() {
-        return this.getFilesDir();
-    }
 
     @Override
     public boolean onCreateOptionsMenu(Menu menu) {
@@ -218,22 +179,22 @@ public class FileChooserActivity extends Activity implements
                 File d = new File("/storage/emulated/0/DCIM/Camera/");
                 File d1 = new File("/storage/emulated/0/DCIM/");
                 for (File file1 : d.listFiles()) {
-                    System.out.println(file1);
+                    Log.i(thisClass, file1.getName());
                 }
                 for (File file1 : d1.listFiles()) {
-                    System.out.println(file1);
+                    Log.i(thisClass, file1.getName());
                 }
                 break;
             case R.id.with_action_add:
                 // show chooser to show file
-                Intent intent = intentWithChooser(Intent.ACTION_GET_CONTENT);
-                if (intentSafe(intent)) {
+                Intent intent = IntentUtil.intentWithChooser(Intent.ACTION_GET_CONTENT);
+                if (IntentUtil.intentSafe(intent, this)) {
                     startActivityForResult(intent, PICK_FILE_REQUEST_CODE);
-                    Log.i(thisClass, "when will it run to here");
+                    Log.i(thisClass, "when will app run to here");
                 } else {
                     // remind use that no apps to open to add
                     Intent remind = new Intent(this, RemindDialog.class);
-                    remind.putExtra(RemindDialog.REMIND_MSG, "no app to open root directory");
+                    remind.putExtra(RemindDialog.REMIND_MSG, "no app to get content");
                     startActivity(remind);
                 }
                 break;
@@ -244,22 +205,6 @@ public class FileChooserActivity extends Activity implements
         return super.onOptionsItemSelected(item);
     }
 
-    /**
-     * prepare the intent for pick some file
-     * <p/>
-     * the app should show: camera, music, media, file manager
-     *
-     * @param action The action string
-     */
-    private Intent intentWithChooser(String action) {
-        Intent intent = new Intent(action);
-
-        String title = getResources().getString(R.string.chooser_title);
-        Intent chooser = Intent.createChooser(intent, title);
-
-        intent.setType("*/*");
-        return chooser;
-    }
 
     /**
      * The action will take after another activity reply to this one
@@ -270,7 +215,7 @@ public class FileChooserActivity extends Activity implements
      */
     @Override
     protected void onActivityResult(int requestCode, int resultCode, Intent data) {
-        Log.e(thisClass, "result");
+        Log.i(thisClass, "in FileChooser result");
         if (resultCode == RESULT_OK) {
             switch (requestCode) {
                 case PICK_FILE_REQUEST_CODE:
@@ -282,12 +227,12 @@ public class FileChooserActivity extends Activity implements
 
                     // create a file save the content under the related folder
                     String path = UriUtility.getPath(this, fileUri);
-                    String name = FileLink.getNameFromPath(path);
-                    FileLink file;
+                    String name = FileUtility.getNameFromPath(path);
+                    FileEncryption file;
                     File saveFile;
                     try {
-                        saveFile = new File(currentSelectedDir(), name);
-                        file = new FileLink(saveFile, path, fileUri.toString(), password);
+                        saveFile = fileChooserBL.getEncryptedFilePath(currentSelectedDir(), name);
+                        file = new FileEncryption(saveFile, path, fileUri.toString(), password);
                     } catch (IOException | NoSuchAlgorithmException e) {
                         Log.e(thisClass, "File write failed: " + e.toString());
                         return;
@@ -295,26 +240,25 @@ public class FileChooserActivity extends Activity implements
                     try {
                         file.encrypt();
                         if (!file.deleteOriginal()) {
-                            throw new RuntimeException("fail to delete original file");
+                            throw new EncryptionException("fail to delete original file");
                         }
                     } catch (IOException e) {
                         Log.e(thisClass, "File encrypt failed: " + e.toString());
                     } catch (NoSuchAlgorithmException | UnrecoverableEntryException | InvalidKeyException e) {
                         Log.e(thisClass, " failed: " + e.toString());
                     }
+                    // add new file to child list
                     addToChildInfo(saveFile);
                     // update the view as if it is clicked
                     folderFragmentClick(fatherIndex);
-                    // add to child
                     break;
 
                 case DELETE_DECRYPTED_REQUEST_CODE:
 
-                    Log.e(thisClass, "result");
                     String filePath = data.getStringExtra(IMAGE_PATH);
                     if (filePath != null) {
                         if (!new File(filePath).delete()) {
-                            throw new RuntimeException("fail to delete file");
+                            throw new EncryptionException("fail to delete original file");
                         }
                     }
 
@@ -327,21 +271,10 @@ public class FileChooserActivity extends Activity implements
 
     private void addToChildInfo(File saveFile) {
         ArrayList<UIFileInfo> uiFileInfos = childDirInfo.get(fatherIndex);
-        uiFileInfos.add(createUiFileInfo(saveFile));
+        uiFileInfos.add(UIFileInfo.createUiFileInfo(saveFile));
         childDirInfo.put(fatherIndex, uiFileInfos);
     }
 
-    private File currentSelectedDir() {
-        return currentSelectedFile(fatherDirInfos, fatherIndex);
-    }
-
-    private boolean intentSafe(Intent intent) {
-        //intent.resolveActivity(getPackageManager()) != null
-        PackageManager packageManager = getPackageManager();
-        List activities = packageManager.queryIntentActivities(intent,
-                PackageManager.MATCH_DEFAULT_ONLY);
-        return activities.size() > 0;
-    }
 
     @Override
     public void folderFragmentClick(int position) {
@@ -358,7 +291,7 @@ public class FileChooserActivity extends Activity implements
         ArrayList<UIFileInfo> files = childDirInfo.get(fatherIndex);
         if (files == null) {
             files = new ArrayList<>();
-            addFile(files, dir);
+            UIFileInfo.addFile(files, dir);
         }
 //        ArrayList<UIFileInfo> files = new ArrayList<>();
 //        addFile(files, dir);
@@ -369,14 +302,11 @@ public class FileChooserActivity extends Activity implements
 
     @Override
     public void detailFragmentClick(int position) {
-        // TODO: 10/7/15 handle long time press
         Log.d(thisClass, position + " is choose");
 
-//        FolderFragment folders = (FolderFragment)
-//                getFragmentManager().findFragmentById(R.id.folder_fragment_container);
 
         if (position >= childDirInfo.get(fatherIndex).size()) {
-            return;
+            throw new RuntimeException("position < childDirInfo.get(fatherIndex).size()");
         }
         UIFileInfo UIFileInfo = childDirInfo.get(fatherIndex).get(position);
         if (UIFileInfo.isDir()) {
@@ -387,19 +317,19 @@ public class FileChooserActivity extends Activity implements
             updateDetailFileInfo(UIFileInfo.toFile());
         } else {
             // decrypt file and show it
-            FileLink fileLink;
+            FileEncryption fileEncryption;
             try {
-                fileLink = new FileLink(UIFileInfo.toFile(), password);
+                fileEncryption = new FileEncryption(UIFileInfo.toFile(), password);
             } catch (IOException e) {
                 Log.e(thisClass, "can't read file" + e);
                 return;
             }
             DecryptedFile decryptedFile;
             try {
-                if (fileLink.largeLinkedSize()) {
-                    decryptedFile = fileLink.decryptPart();
+                if (fileEncryption.largeLinkedSize()) {
+                    decryptedFile = fileEncryption.decryptPart();
                 } else {
-                    fileLink.decryptAll();
+                    fileEncryption.decryptAll();
                 }
             } catch (InvalidAlgorithmParameterException e) {
                 Log.e(thisClass, " failed: " + e.toString());
@@ -415,43 +345,74 @@ public class FileChooserActivity extends Activity implements
                 Log.e(thisClass, " failed: " + e.toString());
 
             }
-            Intent intent = new Intent(this, ImageActivity.class);
-            intent.putExtra(IMAGE_URI, fileLink.getFileUri());
-            intent.putExtra(IMAGE_PATH, fileLink.getLinkedFilePath());
 
-            if (intentSafe(intent)) {
+            // add file path of to be deleted file
+            delPaths.add(fileEncryption.getEncryptedFilePath());
+
+            // start app to view different file
+//            Intent intent = getMyImgIntent(this, fileEncryption);
+            Intent intent = new Intent(Intent.ACTION_VIEW);
+            intent.setDataAndType(Uri.parse(fileEncryption.getFileUri()),
+                    FileUtility.getMimeType(fileEncryption.getLinkedFilePath()));
+
+            if (IntentUtil.intentSafe(intent, this)) {
                 startActivityForResult(intent, DELETE_DECRYPTED_REQUEST_CODE);
             }
 
         }
     }
 
-    private String getMimeType(String path) {
-        MimeTypeMap map = MimeTypeMap.getSingleton();
-        String ext = MimeTypeMap.getFileExtensionFromUrl(path);
-        if (ext.isEmpty()) {
-            ext = path.substring(path.lastIndexOf('.') + 1);
-        }
-        if (ext.equals("jpg")) {
-            ext = "jpeg";
-        }
-        String mimeType = map.getMimeTypeFromExtension(ext);
+    @Override
+    public void detailFragmentLongPress(int position) {
+        Log.d(thisClass, position + " is choose");
 
-        if (mimeType == null) {
-            mimeType = "*/*";
+        UIFileInfo UIFileInfo = childDirInfo.get(fatherIndex).get(position);
+        if (UIFileInfo.isDir()) {
+        } else {
+            FileEncryption fileEncryption;
+            try {
+                fileEncryption = new FileEncryption(UIFileInfo.toFile(), password);
+            } catch (IOException e) {
+                Log.e(thisClass, "can't read file" + e);
+                return;
+            }
+            showMenuDialog(fileEncryption);
         }
-        return mimeType;
     }
-//
-//    public Intent setIntentChooser(Intent intent, Uri path, String type) {
-//        intent.setDataAndType(path, type);
-//        String title = getResources().getString(R.string.chooser_title);
-//        // Create intent to show chooser
-//        return Intent.createChooser(intent, title);
-//    }
 
+    private void showMenuDialog(final FileEncryption fileEncryption) {
+        final CharSequence[] operations = {
+                getString(R.string.file_delete),
+                getString(R.string.file_recover),
+                getString(R.string.file_detail)
+        };
+        final CharSequence[] operationsPrompt = {
+                getString(R.string.file_deleted),
+                getString(R.string.file_recovered),
+                getString(R.string.file_detail_show)
+        };
+        final MenuOp[] menuOps = {
+                MenuDelete.getInstance(),
+                MenuDetail.getInstance(),
+                MenuRecover.getInstance(),
+        };
 
-    public File currentSelectedFile(ArrayList<UIFileInfo> UIFileInfos, int index) {
+        AlertDialog.Builder builder = new AlertDialog.Builder(this);
+        builder.setItems(operations, new DialogInterface.OnClickListener() {
+            public void onClick(DialogInterface dialog, int item) {
+                menuOps[item].operate(fileEncryption);
+                Toast.makeText(getApplicationContext(), operationsPrompt[item], Toast.LENGTH_SHORT).show();
+            }
+        });
+        AlertDialog alert = builder.create();
+        alert.show();
+    }
+
+    private File currentSelectedDir() {
+        return currentSelectedFile(fatherDirInfos, fatherIndex);
+    }
+
+    private File currentSelectedFile(ArrayList<UIFileInfo> UIFileInfos, int index) {
         return UIFileInfos.get(index).toFile();
     }
 }

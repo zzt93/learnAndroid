@@ -1,4 +1,4 @@
-package com.example.zzt.tagdaily.logic;
+package com.example.zzt.tagdaily.logic.mis;
 
 import android.util.Log;
 
@@ -31,7 +31,6 @@ public class KeyStores {
             e.printStackTrace();
         }
         try {
-            // TODO: 10/11/15 need to use this??? will AndroidKeyStore persist secret key???
             ks.load(null);
         } catch (IOException | NoSuchAlgorithmException | CertificateException e) {
             e.printStackTrace();

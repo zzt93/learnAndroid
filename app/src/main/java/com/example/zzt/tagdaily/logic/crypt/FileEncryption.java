@@ -1,10 +1,11 @@
-package com.example.zzt.tagdaily.crypt;
+package com.example.zzt.tagdaily.logic.crypt;
 
-import android.net.Uri;
 import android.util.Log;
 
 import com.example.zzt.tagdaily.BuildConfig;
-import com.example.zzt.tagdaily.logic.Default;
+import com.example.zzt.tagdaily.logic.fileChooser.FileChooserBL;
+import com.example.zzt.tagdaily.logic.mis.Default;
+import com.example.zzt.tagdaily.logic.mis.FileUtility;
 
 import java.io.BufferedInputStream;
 import java.io.BufferedOutputStream;
@@ -40,11 +41,11 @@ import javax.crypto.spec.IvParameterSpec;
  * it can be used to encrypt/decrypt target file for it has the information
  * of target file
  */
-public class FileLink {
+public class FileEncryption {
 
     public static final double MAX_FILE_SIZE = Math.pow(2, 24);
     public static final int ONE_TIME_ENCRYPT = 1024 * 1024;
-    private static String thisClass = FileLink.class.getCanonicalName();
+    private static String thisClass = FileEncryption.class.getCanonicalName();
     /**
      * Target file information
      */
@@ -62,18 +63,18 @@ public class FileLink {
      * @param password Encryption base password
      * @throws IOException
      */
-    public FileLink(File saveFile, String password) throws IOException {
+    public FileEncryption(File saveFile, String password) throws IOException {
         if (!saveFile.exists()) {
-            throw new RuntimeException("Invalid FileLink");
+            throw new RuntimeException("Invalid FileEncryption");
         }
         initPath(saveFile);
         initEncryptedPath(linkedFilePath);
         this.password = password;
     }
 
-    public FileLink(File saveFile, String linkedFilePath, String fileUri, String password) throws IOException, NoSuchAlgorithmException {
+    public FileEncryption(File saveFile, String linkedFilePath, String fileUri, String password) throws IOException, NoSuchAlgorithmException {
         if (saveFile.exists()) {
-            throw new RuntimeException("Invalid FileLink");
+            throw new RuntimeException("Invalid FileEncryption");
         } else {
             /**
              * when will file already exist:
@@ -88,9 +89,15 @@ public class FileLink {
         this.password = password;
     }
 
+    /**
+     * This method decide the path which is used to store encrypted file
+     *
+     * @param path The path of file which user want to hide
+     * @see FileChooserBL#encryptedFileDir()
+     */
     private void initEncryptedPath(String path) {
         // TODO: 10/11/15 consider a dir
-        String[] dirNameFromPath = getDirNameFromPath(path);
+        String[] dirNameFromPath = FileUtility.getDirNameFromPath(path);
         encryptedFilePath = dirNameFromPath[0] + File.separator + Default.DEFAULT_PREFIX + dirNameFromPath[1];
     }
 
@@ -108,25 +115,6 @@ public class FileLink {
         linkedFilePath = br.readLine();
         fileUri = br.readLine();
         br.close();
-    }
-
-    /*
-        File utility
-     */
-    public static String getNameFromPath(String original) {
-        return original.substring(original.lastIndexOf(File.separator) + 1);
-    }
-
-    public static String getDirFromPath(String original) {
-        return original.substring(0, original.lastIndexOf(File.separator));
-    }
-
-    public static String[] getDirNameFromPath(String original) {
-        int lastIndexOf = original.lastIndexOf(File.separator);
-        return new String[]{
-                original.substring(0, lastIndexOf),
-                original.substring(lastIndexOf + 1)
-        };
     }
 
 
@@ -261,6 +249,10 @@ public class FileLink {
 
     public String getFileUri() {
         return fileUri;
+    }
+
+    public String getEncryptedFilePath() {
+        return encryptedFilePath;
     }
 
     public String getPassword() {

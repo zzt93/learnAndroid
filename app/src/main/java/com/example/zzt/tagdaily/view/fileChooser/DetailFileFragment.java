@@ -1,4 +1,4 @@
-package com.example.zzt.tagdaily.fileChooser;
+package com.example.zzt.tagdaily.view.fileChooser;
 
 import android.app.Activity;
 import android.os.Bundle;
@@ -13,7 +13,7 @@ import android.widget.TextView;
 
 
 import com.example.zzt.tagdaily.R;
-import com.example.zzt.tagdaily.logic.UIFileInfo;
+import com.example.zzt.tagdaily.logic.mis.UIFileInfo;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -28,7 +28,8 @@ import java.util.Map;
  * Use the {@link DetailFileFragment#newInstance} factory method to
  * create an instance of this fragment.
  */
-public class DetailFileFragment extends Fragment implements AdapterView.OnItemClickListener {
+public class DetailFileFragment extends Fragment implements AdapterView.OnItemClickListener,
+        AdapterView.OnItemLongClickListener {
     // the fragment initialization parameters, e.g. ARG_ITEM_NUMBER
 //    private static final String ARG_PARAM1 = "param1";
 //    private static final String ARG_PARAM2 = "param2";
@@ -44,7 +45,7 @@ public class DetailFileFragment extends Fragment implements AdapterView.OnItemCl
      * this fragment using the provided parameters.
      *
      * @param UIFileInfos Parameter 1.
-     * @param param2 Parameter 2.
+     * @param param2      Parameter 2.
      * @return A new instance of fragment DetailFileFragment.
      */
     public static DetailFileFragment newInstance(ArrayList<UIFileInfo> UIFileInfos, String param2) {
@@ -95,6 +96,7 @@ public class DetailFileFragment extends Fragment implements AdapterView.OnItemCl
         mListView = (AbsListView) view.findViewById(android.R.id.list);
         mListView.setAdapter(mAdapter);
         mListView.setOnItemClickListener(this);
+        mListView.setOnItemLongClickListener(this);
 
         if (fileList.isEmpty()) {
             setEmptyText(getString(R.string.empty_list));
@@ -130,14 +132,29 @@ public class DetailFileFragment extends Fragment implements AdapterView.OnItemCl
 
     @Override
     public void onItemClick(AdapterView<?> parent, View view, int position, long id) {
-//        fileList.add(makeMap("music", "music sub1"));
-//        mAdapter.notifyDataSetChanged();
         if (null != mListener) {
             // Notify the active callbacks interface (the activity, if the
             // fragment is attached to one) that an item has been selected.
             mListener.detailFragmentClick(position);
         }
     }
+
+
+    @Override
+    public boolean onItemLongClick(AdapterView<?> parent, View view, int position, long id) {
+        if (null != mListener) {
+            // Notify the active callbacks interface (the activity, if the
+            // fragment is attached to one) that an item has been selected.
+            mListener.detailFragmentLongPress(position);
+        }
+        return true;
+    }
+
+
+    /**
+     * xxxListView() method -- all for update data in the this file fragment
+     * which will be invoked by this fragment's container
+     */
 
     public SimpleAdapter clearListView() {
         this.fileList.clear();
@@ -152,6 +169,7 @@ public class DetailFileFragment extends Fragment implements AdapterView.OnItemCl
     }
 
 
+
     /**
      * This interface must be implemented by activities that contain this
      * fragment to allow an interaction in this fragment to be communicated
@@ -164,6 +182,8 @@ public class DetailFileFragment extends Fragment implements AdapterView.OnItemCl
      */
     public interface DetailFragmentInteractionListener {
         void detailFragmentClick(int position);
+
+        void detailFragmentLongPress(int position);
     }
 
 }

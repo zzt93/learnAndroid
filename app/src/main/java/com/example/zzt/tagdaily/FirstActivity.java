@@ -10,9 +10,9 @@ import android.view.MenuItem;
 import android.view.View;
 import android.widget.EditText;
 
-import com.example.zzt.tagdaily.crypt.Crypt;
-import com.example.zzt.tagdaily.fileChooser.FileChooserActivity;
-import com.example.zzt.tagdaily.logic.KeyStores;
+import com.example.zzt.tagdaily.logic.crypt.Crypt;
+import com.example.zzt.tagdaily.view.fileChooser.FileChooserActivity;
+import com.example.zzt.tagdaily.logic.mis.KeyStores;
 
 import java.security.KeyStoreException;
 import java.security.NoSuchAlgorithmException;
