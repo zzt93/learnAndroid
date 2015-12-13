@@ -1,17 +1,15 @@
-package com.example.zzt.tagdaily.logic.mis;
+package com.example.zzt.tagdaily.view.fileChooser;
 
 import com.example.zzt.tagdaily.R;
+import com.example.zzt.tagdaily.logic.mis.FileUtility;
 
 import java.io.File;
-import java.text.DateFormat;
-import java.text.SimpleDateFormat;
 import java.util.ArrayList;
-import java.util.Date;
 import java.util.HashMap;
 
 /**
  * Created by zzt on 10/2/15.
- * <p>
+ * <p/>
  * Usage:
  * the class store the file information for ui
  */
@@ -20,7 +18,6 @@ public class UIFileInfo {
     public static final String LOGO = "logo";
     public static final String LAST_MODIFIED = "lastModify";
 
-    private static DateFormat sdf = SimpleDateFormat.getDateTimeInstance();
     private File file;
     private int id;
 
@@ -39,20 +36,23 @@ public class UIFileInfo {
         return UIFileInfo;
     }
 
-    public static void addFile(ArrayList<UIFileInfo> uiFileInfos, File dir) {
+    public static ArrayList<UIFileInfo> addFileFrom(File dir) {
         if (!dir.isDirectory()) {
-            return;
+            throw new RuntimeException("wrong usage of directory");
         }
+
+        ArrayList<UIFileInfo> uiFileInfos = new ArrayList<>();
         for (File file : dir.listFiles()) {
             UIFileInfo uiFileInfo = createUiFileInfo(file);
             uiFileInfos.add(uiFileInfo);
         }
+        return uiFileInfos;
     }
 
     public HashMap<String, String> convertFileMap() {
         HashMap<String, String> map = new HashMap<>();
         map.put(NAME, file.getName());
-        map.put(LAST_MODIFIED, sdf.format(new Date(file.lastModified())));
+        map.put(LAST_MODIFIED, FileUtility.getCreateTime(file));
         return map;
     }
 

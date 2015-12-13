@@ -3,14 +3,14 @@ package com.example.zzt.tagdaily.logic.fileChooser;
 import android.util.Log;
 
 import com.example.zzt.tagdaily.R;
+import com.example.zzt.tagdaily.logic.crypt.EncryptionException;
 import com.example.zzt.tagdaily.logic.mis.Category;
 import com.example.zzt.tagdaily.logic.mis.Default;
-import com.example.zzt.tagdaily.logic.mis.UIFileInfo;
+import com.example.zzt.tagdaily.view.fileChooser.UIFileInfo;
 import com.example.zzt.tagdaily.view.fileChooser.FileChooserActivity;
 
 import java.io.File;
 import java.util.ArrayList;
-import java.util.HashMap;
 
 /**
  * Created by zzt on 12/12/15.
@@ -26,7 +26,7 @@ public class FileChooserBL {
         this.fileChooserActivity = fileChooserActivity;
     }
 
-    public void createAndInitDir(Category[] values, ArrayList<UIFileInfo> fatherDirInfos, HashMap<Integer, ArrayList<UIFileInfo>> childDirInfo) {
+    public void createAndInitDir(Category[] values, ArrayList<UIFileInfo> fatherDirInfos) {
         File dir = this.encryptedFileDir();
         for (File file : dir.listFiles()) {
             Log.i(thisClass, file.getName());
@@ -44,9 +44,20 @@ public class FileChooserBL {
 
         // init detail file
         File f = new File(this.encryptedFileDir(), values[Default.DEFAULT_FOLDER_I].getName());
-        ArrayList<UIFileInfo> defaultFiles = new ArrayList<>();
-        childDirInfo.put(Default.DEFAULT_FOLDER_I, defaultFiles);
-        UIFileInfo.addFile(defaultFiles, f);
+        UIFileInfo.addFileFrom(f);
+    }
+
+    public boolean deleteFile() {
+        for (String filePath : FileChooserActivity.getDelPaths()) {
+            if (filePath != null) {
+                if (!new File(filePath).delete()) {
+                    throw new EncryptionException("fail to delete original file");
+                }
+            } else {
+                Log.e(thisClass, "file path is null");
+            }
+        }
+        return true;
     }
 
     /**

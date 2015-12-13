@@ -8,5 +8,5 @@ import com.example.zzt.tagdaily.logic.crypt.FileEncryption;
  * Usage:
  */
 public interface MenuOp {
-    void operate(FileEncryption fileEncryption);
+    boolean operate(FileEncryption fileEncryption);
 }

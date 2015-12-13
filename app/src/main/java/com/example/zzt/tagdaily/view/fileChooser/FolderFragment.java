@@ -13,7 +13,6 @@ import android.widget.SimpleAdapter;
 import android.widget.TextView;
 
 import com.example.zzt.tagdaily.R;
-import com.example.zzt.tagdaily.logic.mis.UIFileInfo;
 
 import java.util.ArrayList;
 import java.util.List;

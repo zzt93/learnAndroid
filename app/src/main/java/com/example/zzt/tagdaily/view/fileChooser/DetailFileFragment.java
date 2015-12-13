@@ -13,7 +13,6 @@ import android.widget.TextView;
 
 
 import com.example.zzt.tagdaily.R;
-import com.example.zzt.tagdaily.logic.mis.UIFileInfo;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -35,6 +34,13 @@ public class DetailFileFragment extends Fragment implements AdapterView.OnItemCl
 //    private static final String ARG_PARAM2 = "param2";
 
     private AbsListView mListView;
+    /**
+     * An easy adapter to map static data to views defined in an XML file. You can specify the data
+     * backing the list as an ArrayList of Maps. Each entry in the ArrayList corresponds to one row
+     * in the list. The Maps contain the data for each row. You also specify an XML file that
+     * defines the views used to display the row, and a mapping from keys in the Map to specific
+     * views.
+     */
     private SimpleAdapter mAdapter;
 
     private DetailFragmentInteractionListener mListener;
@@ -92,24 +98,23 @@ public class DetailFileFragment extends Fragment implements AdapterView.OnItemCl
                              Bundle savedInstanceState) {
         // Inflate the layout for this fragment
         View view = inflater.inflate(R.layout.fragment_detail_file, container, false);
-        // Set data adapter for list view, ie associate data with view
         mListView = (AbsListView) view.findViewById(android.R.id.list);
+        View empty = view.findViewById(R.id.emptyList);
+        mListView.setEmptyView(empty);
+        if (fileList.isEmpty()) {
+            setEmptyVisibility(View.VISIBLE);
+        }
+        // Set data adapter for list view, ie associate data with view
         mListView.setAdapter(mAdapter);
         mListView.setOnItemClickListener(this);
         mListView.setOnItemLongClickListener(this);
 
-        if (fileList.isEmpty()) {
-            setEmptyText(getString(R.string.empty_list));
-        }
         return view;
     }
 
-    private void setEmptyText(String string) {
+    private void setEmptyVisibility(int visible) {
         View emptyView = mListView.getEmptyView();
-
-        if (emptyView instanceof TextView) {
-            ((TextView) emptyView).setText(string);
-        }
+        emptyView.setVisibility(visible);
     }
 
 
@@ -156,18 +161,26 @@ public class DetailFileFragment extends Fragment implements AdapterView.OnItemCl
      * which will be invoked by this fragment's container
      */
 
-    public SimpleAdapter clearListView() {
+    public DetailFileFragment clearListView() {
         this.fileList.clear();
-        return mAdapter;
+        return this;
     }
 
-    public SimpleAdapter addListView(ArrayList<UIFileInfo> fileList) {
+    public DetailFileFragment addListView(ArrayList<UIFileInfo> fileList) {
         for (UIFileInfo UIFileInfo : fileList) {
             this.fileList.add(UIFileInfo.convertFileMap());
         }
-        return mAdapter;
+        return this;
     }
 
+    public void notifyDataSetChanged() {
+        if (fileList.isEmpty()) {
+            setEmptyVisibility(View.VISIBLE);
+        } else {
+            setEmptyVisibility(View.GONE);
+        }
+        mAdapter.notifyDataSetChanged();
+    }
 
 
     /**

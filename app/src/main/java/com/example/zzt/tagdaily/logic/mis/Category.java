@@ -1,6 +1,7 @@
 package com.example.zzt.tagdaily.logic.mis;
 
 import com.example.zzt.tagdaily.R;
+import com.example.zzt.tagdaily.view.fileChooser.UIFileInfo;
 
 import java.util.HashMap;
 

@@ -53,9 +53,14 @@
                 android:name="android.support.PARENT_ACTIVITY"
                 android:value="com.example.zzt.tagdaily.FirstActivity" />
         </activity>
-        <activity android:name=".view.imageViewer.ImageActivity"
+        <activity
+            android:name=".view.imageViewer.ImageActivity"
             android:parentActivityName=".view.fileChooser.FileChooserActivity">
-
+        </activity>
+        <activity
+            android:name=".view.fileChooser.InfoDialog"
+            android:parentActivityName=".view.fileChooser.FileChooserActivity"
+            android:theme="@android:style/Theme.Dialog">
         </activity>
     </application>
 

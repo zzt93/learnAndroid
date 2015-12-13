@@ -46,13 +46,15 @@ public class FileEncryption {
     public static final double MAX_FILE_SIZE = Math.pow(2, 24);
     public static final int ONE_TIME_ENCRYPT = 1024 * 1024;
     private static String thisClass = FileEncryption.class.getCanonicalName();
+    private File saveFile;
     /**
-     * Target file information
+     * Target file information which stored in the @see FileEncryption#saveFile
      */
     private String linkedFilePath;
+    private String fileUri;
+
     private String encryptedFilePath;
     private String password;
-    private String fileUri;
 
     /**
      * To reuse an added fileLink, can't change linkedFilePath
@@ -67,6 +69,7 @@ public class FileEncryption {
         if (!saveFile.exists()) {
             throw new RuntimeException("Invalid FileEncryption");
         }
+        this.saveFile = saveFile;
         initPath(saveFile);
         initEncryptedPath(linkedFilePath);
         this.password = password;
@@ -76,11 +79,7 @@ public class FileEncryption {
         if (saveFile.exists()) {
             throw new RuntimeException("Invalid FileEncryption");
         } else {
-            /**
-             * when will file already exist:
-             *  1. re-add a already added file -- impossible
-             *  2. reuse a added file
-             */
+            this.saveFile = saveFile;
             this.linkedFilePath = linkedFilePath;
             this.fileUri = fileUri;
             writeToFile(saveFile, linkedFilePath, fileUri);
@@ -181,12 +180,16 @@ public class FileEncryption {
      * @throws NoSuchAlgorithmException
      * @throws IOException
      * @throws UnrecoverableEntryException
+     * @param checkSize The flag to indicate whether to check the size of file to be encrypted
      */
-    public void decryptAll() throws InvalidAlgorithmParameterException, InvalidKeyException, NoSuchAlgorithmException, UnrecoverableEntryException, IOException {
+    public void decryptAll(boolean checkSize) throws InvalidAlgorithmParameterException, InvalidKeyException, NoSuchAlgorithmException, UnrecoverableEntryException, IOException {
+        if (decryptedFileExist()) {
+            return;
+        }
         DecryptedFile decryptedFile = decryptPart();
         File file = new File(encryptedFilePath);
         long length = file.length();
-        if (length > MAX_FILE_SIZE) {
+        if (checkSize && length > MAX_FILE_SIZE) {
             throw new RuntimeException("using wrong method to decrypt file");
         }
         BufferedOutputStream bufferedOutputStream =
@@ -201,6 +204,10 @@ public class FileEncryption {
         bufferedOutputStream.close();
     }
 
+    private boolean decryptedFileExist() {
+        return new File(linkedFilePath).exists();
+    }
+
     /**
      * @return A decrypted file you can get byte by byte or read more depend
      * on the memory or something else
@@ -211,6 +218,7 @@ public class FileEncryption {
      */
     public DecryptedFile decryptPart()
             throws UnrecoverableEntryException, InvalidAlgorithmParameterException, InvalidKeyException, NoSuchAlgorithmException, FileNotFoundException {
+
         Cipher cipher;
         try {
             cipher = Cipher.getInstance(Crypt.CRYPT_ALGO + Crypt.MODE_PADDING);
@@ -262,4 +270,14 @@ public class FileEncryption {
     public boolean largeLinkedSize() {
         return new File(encryptedFilePath).length() > MAX_FILE_SIZE;
     }
+
+    public boolean deleteEncrypted() {
+        return new File(encryptedFilePath).delete();
+    }
+
+    public boolean deleteSaveFile() {
+        return saveFile.delete();
+    }
+
+
 }

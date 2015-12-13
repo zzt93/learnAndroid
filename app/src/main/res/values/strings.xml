@@ -15,7 +15,6 @@
     <string name="action_dialog">show dialog</string>
     <string name="title_activity_with_fragment">WithFragment</string>
 
-    <!-- TODO: Remove or change this placeholder text -->
     <string name="hello_blank_fragment" translatable="false">Hello blank fragment</string>
     <string name="action_fragment">show fragment</string>
     <string name="empty_list">no files for the time being, add by press add on the menu</string>
@@ -25,7 +24,19 @@
     <string name="file_delete">delete</string>
     <string name="file_detail">detail</string>
     <string name="file_deleted">deleted</string>
-    <string name="file_detail_show">show the detail</string>
+    <string name="file_detail_show">detail</string>
     <string name="file_recover">recover</string>
     <string name="file_recovered">recovered</string>
+    <string name="encryptSucc">add file succeed</string>
+    <string name="encryptFail">add file failed: can\'t encrypt file</string>
+    <string name="noPassword">no password</string>
+    <string name="file_confirm">Confirm</string>
+    <string name="file_recover_prompt">Are you sure to recover this file?</string>
+    <string name="file_delete_prompt">Are you sure to delete this encrypted file?(you will lose your original file)</string>
+    <string name="file_name">File name</string>
+    <string name="file_size">File size</string>
+    <string name="file_time">File added at</string>
+    <string name="file_info">File Info</string>
+    <string name="dialog_ok">OK</string>
+    <string name="dialog_cancel">Cancel</string>
 </resources>

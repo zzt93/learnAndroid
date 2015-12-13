@@ -23,4 +23,16 @@
     <string name="file_detail_show">显示完成</string>
     <string name="file_recover">恢复文件</string>
     <string name="file_recovered">恢复成功</string>
+    <string name="encryptFail">文件添加失败：无法加密</string>
+    <string name="encryptSucc">文件添加成功</string>
+    <string name="noPassword">无密码</string>
+    <string name="file_recover_prompt">确认恢复文件？（文件将正常显示）</string>
+    <string name="file_confirm">确认</string>
+    <string name="file_delete_prompt">确认删除？（您的原有文件将不会恢复）</string>
+    <string name="file_size">文件大小</string>
+    <string name="file_time">文件添加时间</string>
+    <string name="file_name">文件名</string>
+    <string name="file_info">文件详情</string>
+    <string name="dialog_cancel">放弃</string>
+    <string name="dialog_ok">确定</string>
 </resources>

@@ -19,12 +19,13 @@ public class IntentUtil {
      * <p/>
      * the app should show: camera, music, media, file manager
      *
+     * @param context The context has the resources
      * @param action The action string
      */
-    public static Intent intentWithChooser(String action) {
+    public static Intent intentWithChooser(Context context, String action) {
         Intent intent = new Intent(action);
 
-        String title = Resources.getSystem().getString(R.string.chooser_title);
+        String title = context.getResources().getString(R.string.chooser_title);
         Intent chooser = Intent.createChooser(intent, title);
 
         intent.setType("*/*");
