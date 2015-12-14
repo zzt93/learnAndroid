@@ -43,6 +43,10 @@ import javax.crypto.spec.IvParameterSpec;
  */
 public class FileEncryption {
 
+    static {
+        System.load("hello");
+    }
+
     public static final double MAX_FILE_SIZE = Math.pow(2, 24);
     public static final int ONE_TIME_ENCRYPT = 1024 * 1024;
     private static String thisClass = FileEncryption.class.getCanonicalName();
@@ -219,6 +223,7 @@ public class FileEncryption {
     public DecryptedFile decryptPart()
             throws UnrecoverableEntryException, InvalidAlgorithmParameterException, InvalidKeyException, NoSuchAlgorithmException, FileNotFoundException {
 
+        hello();
         Cipher cipher;
         try {
             cipher = Cipher.getInstance(Crypt.CRYPT_ALGO + Crypt.MODE_PADDING);
@@ -279,5 +284,6 @@ public class FileEncryption {
         return saveFile.delete();
     }
 
+    public native int hello();
 
 }
