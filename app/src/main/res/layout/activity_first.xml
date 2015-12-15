@@ -1,57 +1,49 @@
 <LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
-              xmlns:tools="http://schemas.android.com/tools"
-              android:layout_width="match_parent"
-              android:layout_height="match_parent"
-              android:orientation="vertical"
-    >
+    xmlns:tools="http://schemas.android.com/tools"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:orientation="vertical">
 
     <LinearLayout
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:orientation="horizontal"
-        >
+        android:orientation="horizontal">
 
         <EditText
             android:id="@+id/edit_message"
             android:layout_width="0dp"
             android:layout_height="wrap_content"
             android:layout_weight="2"
-            android:hint="@string/edit_message"
-            />
+            android:hint="@string/edit_message" />
 
         <Button
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:onClick="sendMessage"
-            android:text="@string/button_send"
-            />
+            android:text="@string/button_send" />
     </LinearLayout>
 
     <Button
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:onClick="showTransparent"
-        android:text="@string/action_transparent"
-        />
+        android:text="@string/action_transparent" />
 
     <Button
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:onClick="showDialog"
-        android:text="@string/action_dialog"
-        />
+        android:text="@string/action_dialog" />
 
     <Button
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:onClick="showFragment"
-        android:text="@string/action_fragment"
-        />
+        android:text="@string/action_fragment" />
 
     <SearchView
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
         android:id="@+id/searchView"
-        />
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content" />
 </LinearLayout>
 

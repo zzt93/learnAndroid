@@ -62,7 +62,7 @@ public class DeriveKey {
         return salt;
     }
 
-    private static SecretKey initSecretKey(String password, int keyLen, String cryptAlgo, byte[] salt) {
+    protected static SecretKey initSecretKey(String password, int keyLen, String cryptAlgo, byte[] salt) {
         KeySpec keySpec = new PBEKeySpec(password.toCharArray(), salt,
                 ITERATION_COUNT, keyLen);
         SecretKeyFactory keyFactory;

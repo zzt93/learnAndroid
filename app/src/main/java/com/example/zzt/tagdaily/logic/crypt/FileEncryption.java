@@ -1,11 +1,18 @@
 package com.example.zzt.tagdaily.logic.crypt;
 
+import android.content.Context;
 import android.util.Log;
 
 import com.example.zzt.tagdaily.BuildConfig;
 import com.example.zzt.tagdaily.logic.fileChooser.FileChooserBL;
 import com.example.zzt.tagdaily.logic.mis.Default;
 import com.example.zzt.tagdaily.logic.mis.FileUtility;
+import com.facebook.android.crypto.keychain.SharedPrefsBackedKeyChain;
+import com.facebook.crypto.Crypto;
+import com.facebook.crypto.Entity;
+import com.facebook.crypto.exception.CryptoInitializationException;
+import com.facebook.crypto.exception.KeyChainException;
+import com.facebook.crypto.util.SystemNativeCryptoLibrary;
 
 import java.io.BufferedInputStream;
 import java.io.BufferedOutputStream;
@@ -16,6 +23,8 @@ import java.io.FileNotFoundException;
 import java.io.FileOutputStream;
 import java.io.FileReader;
 import java.io.IOException;
+import java.io.InputStream;
+import java.io.OutputStream;
 import java.io.OutputStreamWriter;
 import java.security.InvalidAlgorithmParameterException;
 import java.security.InvalidKeyException;
@@ -44,7 +53,7 @@ import javax.crypto.spec.IvParameterSpec;
 public class FileEncryption {
 
     static {
-        System.load("hello");
+        System.loadLibrary("hello");
     }
 
     public static final double MAX_FILE_SIZE = Math.pow(2, 24);
@@ -132,7 +141,8 @@ public class FileEncryption {
      * @throws NoSuchAlgorithmException
      */
     public boolean encrypt()
-            throws IOException, UnrecoverableEntryException, InvalidKeyException, NoSuchAlgorithmException {
+            throws IOException, UnrecoverableEntryException,
+            InvalidKeyException, NoSuchAlgorithmException {
         // prepare cipher
         Cipher cipher;
         byte[] iv = DeriveKey.getRandomByte(Crypt.KEY_BITS);
@@ -179,14 +189,16 @@ public class FileEncryption {
      * Decrypt all of the content of file under original folder
      * and write it to some file
      *
+     * @param checkSize The flag to indicate whether to check the size of file to be encrypted
      * @throws InvalidAlgorithmParameterException
      * @throws InvalidKeyException
      * @throws NoSuchAlgorithmException
      * @throws IOException
      * @throws UnrecoverableEntryException
-     * @param checkSize The flag to indicate whether to check the size of file to be encrypted
      */
-    public void decryptAll(boolean checkSize) throws InvalidAlgorithmParameterException, InvalidKeyException, NoSuchAlgorithmException, UnrecoverableEntryException, IOException {
+    public void decryptAll(boolean checkSize)
+            throws InvalidAlgorithmParameterException, InvalidKeyException,
+            NoSuchAlgorithmException, UnrecoverableEntryException, IOException {
         if (decryptedFileExist()) {
             return;
         }
@@ -221,9 +233,11 @@ public class FileEncryption {
      * @throws NoSuchAlgorithmException
      */
     public DecryptedFile decryptPart()
-            throws UnrecoverableEntryException, InvalidAlgorithmParameterException, InvalidKeyException, NoSuchAlgorithmException, FileNotFoundException {
+            throws UnrecoverableEntryException, InvalidAlgorithmParameterException,
+            InvalidKeyException, NoSuchAlgorithmException, FileNotFoundException {
 
-        hello();
+        boolean res = opensslEncrypt();
+        Log.i(thisClass, "jni test result is " + res);
         Cipher cipher;
         try {
             cipher = Cipher.getInstance(Crypt.CRYPT_ALGO + Crypt.MODE_PADDING);
@@ -285,5 +299,52 @@ public class FileEncryption {
     }
 
     public native int hello();
+
+    public native boolean opensslEncrypt();
+
+    public boolean encryptConceal(Context context) throws IOException, CryptoInitializationException, KeyChainException {
+        // Creates a new Crypto object with default implementations of
+        // a key chain as well as native library.
+        Crypto crypto = new Crypto(
+                new SharedPrefsBackedKeyChain(context),
+                new SystemNativeCryptoLibrary());
+
+        // Check for whether the crypto functionality is available
+        // This might fail if android does not load libaries correctly.
+        if (!crypto.isAvailable()) {
+            return false;
+        }
+
+        OutputStream fileStream = new BufferedOutputStream(
+                new FileOutputStream(encryptedFilePath));
+
+        // Creates an output stream which encrypts the data as
+        // it is written to it and writes it out to the file.
+        Entity entity = null;
+        OutputStream outputStream = crypto.getCipherOutputStream(
+                fileStream,
+                entity);
+
+        outputStream.write(ONE_TIME_ENCRYPT);
+        outputStream.close();
+        return true;
+    }
+
+    public DecryptedFile decryptPartConceal(Context context) throws IOException, KeyChainException, CryptoInitializationException {
+        // Get the file to which ciphertext has been written.
+        FileInputStream fileStream = new FileInputStream(encryptedFilePath);
+
+        // Creates an input stream which decrypts the data as
+        // it is read from it.
+        Crypto crypto = new Crypto(
+                new SharedPrefsBackedKeyChain(context),
+                new SystemNativeCryptoLibrary());
+        Entity entity = null;
+        InputStream inputStream = crypto.getCipherInputStream(
+                fileStream,
+                entity);
+
+        return new DecryptedFile(inputStream);
+    }
 
 }

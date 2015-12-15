@@ -1,6 +1,7 @@
 package com.example.zzt.tagdaily.logic.crypt;
 
 import java.io.IOException;
+import java.io.InputStream;
 
 import javax.crypto.CipherInputStream;
 
@@ -10,9 +11,9 @@ import javax.crypto.CipherInputStream;
  * Usage:
  */
 public class DecryptedFile {
-    CipherInputStream cipherInputStream;
+    InputStream cipherInputStream;
 
-    public DecryptedFile(CipherInputStream cipherInputStream) {
+    public DecryptedFile(InputStream cipherInputStream) {
         this.cipherInputStream = cipherInputStream;
     }
 

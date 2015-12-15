@@ -26,7 +26,7 @@
     <!-- ActionBar title text: 'TagDaily' -->
     <style name="MyActionBarTitleText"
            parent="@android:style/TextAppearance.Holo.Widget.ActionBar.Title">
-        <item name="android:textColor">@color/Crimson</item>
+        <item name="android:textColor">@color/White</item>
         <!--<item name="android:textAppearanceLarge">true</item>-->
     </style>
 
