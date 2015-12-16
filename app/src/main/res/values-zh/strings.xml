@@ -13,7 +13,7 @@
     <string name="title_activity_transparent_theme">透明</string>
     <string name="action_fragment">显示片段</string>
     <string name="title_activity_with_fragment">使用片段</string>
-    <string name="empty_list">现在还没有文件, 点击添加保存文件</string>
+    <string name="empty_list_msg">%1$s: 现在还没有文件, 点击添加保存文件</string>
     <string name="title_activity_filer_chooser">浏览</string>
     <string name="chooser_title">打开通过</string>
     <string name="imageStr">图片</string>

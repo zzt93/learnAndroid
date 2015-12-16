@@ -45,20 +45,21 @@ public class DetailFileFragment extends Fragment implements AdapterView.OnItemCl
 
     private DetailFragmentInteractionListener mListener;
     private List<Map<String, String>> fileList = new ArrayList<>();
+    private String fatherName;
 
     /**
      * Use this factory method to create a new instance of
      * this fragment using the provided parameters.
      *
      * @param UIFileInfos Parameter 1.
-     * @param param2      Parameter 2.
+     * @param fatherName      father folder name
      * @return A new instance of fragment DetailFileFragment.
      */
-    public static DetailFileFragment newInstance(ArrayList<UIFileInfo> UIFileInfos, String param2) {
+    public static DetailFileFragment newInstance(ArrayList<UIFileInfo> UIFileInfos, String fatherName) {
         DetailFileFragment fragment = new DetailFileFragment();
         Bundle args = new Bundle();
-//        args.putString(ARG_PARAM1, param1);
-//        args.putString(ARG_PARAM2, param2);
+
+        fragment.fatherName = fatherName;
         fragment.setArguments(args);
 
         for (UIFileInfo UIFileInfo : UIFileInfos) {
@@ -103,6 +104,7 @@ public class DetailFileFragment extends Fragment implements AdapterView.OnItemCl
         mListView.setEmptyView(empty);
         if (fileList.isEmpty()) {
             setEmptyVisibility(View.VISIBLE);
+            setEmptyText(fatherName);
         }
         // Set data adapter for list view, ie associate data with view
         mListView.setAdapter(mAdapter);
@@ -113,9 +115,16 @@ public class DetailFileFragment extends Fragment implements AdapterView.OnItemCl
     }
 
     private void setEmptyVisibility(int visible) {
-        View emptyView = mListView.getEmptyView();
+        TextView emptyView = (TextView) mListView.getEmptyView();
         emptyView.setVisibility(visible);
     }
+
+    private void setEmptyText(String fatherName) {
+        TextView emptyView = (TextView) mListView.getEmptyView();
+        emptyView.setText(String.format(getResources().getString(R.string.empty_list_msg), fatherName));
+    }
+
+
 
 
     @Override
@@ -173,9 +182,10 @@ public class DetailFileFragment extends Fragment implements AdapterView.OnItemCl
         return this;
     }
 
-    public void notifyDataSetChanged() {
+    public void notifyDataSetChanged(String fatherName) {
         if (fileList.isEmpty()) {
             setEmptyVisibility(View.VISIBLE);
+            setEmptyText(fatherName);
         } else {
             setEmptyVisibility(View.GONE);
         }

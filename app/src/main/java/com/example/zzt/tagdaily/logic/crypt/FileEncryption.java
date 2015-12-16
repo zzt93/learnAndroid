@@ -12,6 +12,7 @@ import com.facebook.crypto.Crypto;
 import com.facebook.crypto.Entity;
 import com.facebook.crypto.exception.CryptoInitializationException;
 import com.facebook.crypto.exception.KeyChainException;
+import com.facebook.crypto.streams.BetterCipherInputStream;
 import com.facebook.crypto.util.SystemNativeCryptoLibrary;
 
 import java.io.BufferedInputStream;
@@ -32,6 +33,7 @@ import java.security.NoSuchAlgorithmException;
 import java.security.UnrecoverableEntryException;
 
 import javax.crypto.Cipher;
+//import javax.crypto.CipherInputStream;
 import javax.crypto.CipherInputStream;
 import javax.crypto.CipherOutputStream;
 import javax.crypto.NoSuchPaddingException;
@@ -236,8 +238,10 @@ public class FileEncryption {
             throws UnrecoverableEntryException, InvalidAlgorithmParameterException,
             InvalidKeyException, NoSuchAlgorithmException, FileNotFoundException {
 
-        boolean res = opensslEncrypt();
-        Log.i(thisClass, "jni test result is " + res);
+        // jni test
+//        boolean res = opensslEncrypt();
+//        Log.i(thisClass, "jni test result is " + res);
+
         Cipher cipher;
         try {
             cipher = Cipher.getInstance(Crypt.CRYPT_ALGO + Crypt.MODE_PADDING);
@@ -330,21 +334,20 @@ public class FileEncryption {
         return true;
     }
 
-    public DecryptedFile decryptPartConceal(Context context) throws IOException, KeyChainException, CryptoInitializationException {
-        // Get the file to which ciphertext has been written.
-        FileInputStream fileStream = new FileInputStream(encryptedFilePath);
-
-        // Creates an input stream which decrypts the data as
-        // it is read from it.
-        Crypto crypto = new Crypto(
-                new SharedPrefsBackedKeyChain(context),
-                new SystemNativeCryptoLibrary());
-        Entity entity = null;
-        InputStream inputStream = crypto.getCipherInputStream(
-                fileStream,
-                entity);
-
-        return new DecryptedFile(inputStream);
-    }
+//    public DecryptedFile decryptPartConceal(Context context) throws IOException, KeyChainException, CryptoInitializationException {
+//        // Get the file to which ciphertext has been written.
+//        FileInputStream fileStream = new FileInputStream(encryptedFilePath);
+//
+//        // Creates an input stream which decrypts the data as
+//        // it is read from it.
+//        Crypto crypto = new Crypto(
+//                new SharedPrefsBackedKeyChain(context),
+//                new SystemNativeCryptoLibrary());
+//        Entity entity = null;
+//        InputStream inputStream = crypto.getCipherInputStream(
+//                fileStream,
+//                entity);
+//        return new DecryptedFile(inputStream);
+//    }
 
 }

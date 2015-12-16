@@ -101,7 +101,7 @@ public class FileChooserActivity extends Activity implements
                     new int[]{R.id.logo, R.id.desc1}
             );
             detailFragment = DetailFileFragment.newInstance(
-                    UIFileInfo.addFileFrom(currentSelectedDir()), "fragment");
+                    UIFileInfo.addFileFrom(currentSelectedDir()), currentSelectedDir().getName());
             // In case this activity was started with special instructions from an
             // Intent, pass the Intent's extras to the fragment as arguments
             folderFragment.setArguments(getIntent().getExtras());
@@ -300,7 +300,7 @@ public class FileChooserActivity extends Activity implements
 //        addFileFrom(files, dir);
         detailFragment.clearListView();
         detailFragment.addListView(files)
-                .notifyDataSetChanged();
+                .notifyDataSetChanged(currentSelectedDir().getName());
     }
 
     @Override

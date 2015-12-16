@@ -127,7 +127,7 @@ public class FolderFragment extends Fragment implements AbsListView.OnItemClickL
         mListView.setOnItemClickListener(this);
 
         if (category.isEmpty()) {
-            setEmptyText(getString(R.string.empty_list));
+            setEmptyText(getString(R.string.empty_list_msg));
         }
 
         return view;
