@@ -1,6 +1,5 @@
 package com.example.zzt.tagdaily.logic.mis;
 
-import android.graphics.Path;
 import android.webkit.MimeTypeMap;
 
 import java.io.File;
@@ -76,6 +75,10 @@ public class FileUtility {
     public static String getFileSizeStr(File file) {
         long length = file.length();
         int digitGroups = (int) (Math.log10(length) / Math.log10(1024));
+        if(digitGroups > units.length - 1
+                && digitGroups < 0) {
+            throw new RuntimeException("invalid file size");
+        }
         return new DecimalFormat("#,##0.#").format(length / size[digitGroups]) + " " + units[digitGroups];
     }
 

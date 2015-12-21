@@ -12,7 +12,6 @@ import com.facebook.crypto.Crypto;
 import com.facebook.crypto.Entity;
 import com.facebook.crypto.exception.CryptoInitializationException;
 import com.facebook.crypto.exception.KeyChainException;
-import com.facebook.crypto.streams.BetterCipherInputStream;
 import com.facebook.crypto.util.SystemNativeCryptoLibrary;
 
 import java.io.BufferedInputStream;
@@ -24,7 +23,6 @@ import java.io.FileNotFoundException;
 import java.io.FileOutputStream;
 import java.io.FileReader;
 import java.io.IOException;
-import java.io.InputStream;
 import java.io.OutputStream;
 import java.io.OutputStreamWriter;
 import java.security.InvalidAlgorithmParameterException;
@@ -33,12 +31,13 @@ import java.security.NoSuchAlgorithmException;
 import java.security.UnrecoverableEntryException;
 
 import javax.crypto.Cipher;
-//import javax.crypto.CipherInputStream;
 import javax.crypto.CipherInputStream;
 import javax.crypto.CipherOutputStream;
 import javax.crypto.NoSuchPaddingException;
 import javax.crypto.SecretKey;
 import javax.crypto.spec.IvParameterSpec;
+
+//import javax.crypto.CipherInputStream;
 
 /**
  * Created by zzt on 10/6/15.
@@ -59,7 +58,11 @@ public class FileEncryption {
     }
 
     public static final double MAX_FILE_SIZE = Math.pow(2, 24);
-    public static final int ONE_TIME_ENCRYPT = 1024 * 1024;
+    /**
+     * BetterCipherInputStream ask for the size smaller than 256
+     * or it will throw ShortBufferException
+     */
+    public static final int ONE_TIME_ENCRYPT = 256;
     private static String thisClass = FileEncryption.class.getCanonicalName();
     private File saveFile;
     /**

@@ -3,8 +3,6 @@ package com.example.zzt.tagdaily.logic.crypt;
 import java.io.IOException;
 import java.io.InputStream;
 
-import javax.crypto.CipherInputStream;
-
 /**
  * Created by zzt on 10/11/15.
  * <p>
@@ -34,7 +32,8 @@ public class DecryptedFile {
     }
 
     public int read(byte[] buffer) throws IOException {
-        return cipherInputStream.read(buffer);
+        int read = cipherInputStream.read(buffer);
+        return read;
     }
 
     public boolean markSupported() {
